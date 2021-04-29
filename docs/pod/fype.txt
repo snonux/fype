@@ -425,10 +425,10 @@ SELF DEFINING PROCEDURES AND FUNCTIONS
             bar; # Will produce an error, because bar is out of scope!
 
 AUTHOR
-    Paul C. Buetow (http://paul.buetow.org)
+    Paul C. Buetow (http://buetow.org)
 
 WEBSITE
-    The Fype Language (http://fype.buetow.org)
+    The Fype Language
 
 SEE ALSO
     awk(1) cc(1) make(1)

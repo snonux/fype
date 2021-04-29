@@ -2,8 +2,7 @@
  *: File: ./src/core/scope.c
  *: A simple interpreter
  *: 
- *: WWW		: http://fype.buetow.org
- *: AUTHOR	: http://paul.buetow.org
+ *: AUTHOR	: Paul Buetow http://buetow.org
  *: E-Mail	: fype at dev.buetow.org
  *: 
  *: Copyright (c) 2005 - 2008, Paul Buetow 

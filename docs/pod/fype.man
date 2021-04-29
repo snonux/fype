@@ -561,10 +561,10 @@ Nested functions work the same way the nested procedures work, with the exceptio
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"
-Paul C. Buetow (http://paul.buetow.org)
+Paul C. Buetow (http://buetow.org)
 .SH "WEBSITE"
 .IX Header "WEBSITE"
-The Fype Language (http://fype.buetow.org)
+The Fype Language (https://github.com/snonux/fype)
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIawk\fR\|(1) \fIcc\fR\|(1) \fImake\fR\|(1)

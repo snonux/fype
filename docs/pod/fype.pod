@@ -483,11 +483,11 @@ Nested functions work the same way the nested procedures work, with the exceptio
 
 =head1 AUTHOR
 
-Paul C. Buetow (http://paul.buetow.org)
+Paul C. Buetow (http://buetow.org)
 
 =head1 WEBSITE
 
-The Fype Language (http://fype.buetow.org)
+The Fype Language (https://github.com/snonux/fype)
 
 =head1 SEE ALSO
 

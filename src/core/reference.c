@@ -2,8 +2,8 @@
  *: File: ./src/core/reference.c
  *: A simple interpreter
  *: 
- *: WWW		: http://fype.buetow.org
- *: AUTHOR	: http://paul.buetow.org
+ *: WWW		: https://github.com/snonux/fype
+ *: AUTHOR	: http://buetow.org
  *: E-Mail	: fype at dev.buetow.org
  *: 
  *: Copyright (c) 2005 - 2008, Paul Buetow 

@@ -2,7 +2,7 @@
  *: File: ./src/defines.h
  *: A simple interpreter
  *: 
- *: WWW		: https://github.com/snonux/fype
+ *: WWW		: https://codeberg.org/snonux/fype
  *: AUTHOR	: http://buetow.org
  *: E-Mail	: fype at dev.buetow.org
  *: 
@@ -54,7 +54,7 @@
 #define ASSEMBLER "yasm"
 #define LINKER "cc"
 #define SCANNER_BUFSIZE 512
-#define URL "<https://github.com/snonux/fype>"
+#define URL "<https://codeberg.org/snonux/fype>"
 #define VERSION "Superalpha Build"
 
 

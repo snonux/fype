@@ -428,7 +428,7 @@ AUTHOR
     Paul C. Buetow (http://buetow.org)
 
 WEBSITE
-    The Fype Language (https://github.com/snonux/fype)
+    The Fype Language (https://codeberg.org/snonux/fype)
 
 SEE ALSO
     awk(1) cc(1) make(1)

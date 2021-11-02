@@ -564,7 +564,7 @@ Nested functions work the same way the nested procedures work, with the exceptio
 Paul C. Buetow (http://buetow.org)
 .SH "WEBSITE"
 .IX Header "WEBSITE"
-The Fype Language (https://github.com/snonux/fype)
+The Fype Language (https://codeberg.org/snonux/fype)
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIawk\fR\|(1) \fIcc\fR\|(1) \fImake\fR\|(1)

@@ -487,7 +487,7 @@ Paul C. Buetow (http://buetow.org)
 
 =head1 WEBSITE
 
-The Fype Language (https://github.com/snonux/fype)
+The Fype Language (https://codeberg.org/snonux/fype)
 
 =head1 SEE ALSO
 

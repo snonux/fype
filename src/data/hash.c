@@ -2,7 +2,7 @@
  *: File: ./src/data/hash.c
  *: A simple interpreter
  *: 
- *: WWW		: https://github.com/snonux/fype
+ *: WWW		: https://codeberg.org/snonux/fype
  *: AUTHOR	: http://buetow.org
  *: E-Mail	: fype at dev.buetow.org
  *: 

@@ -630,6 +630,107 @@ _control(Interpret *p_interpret) {
       return (1);
    }
    break;
+   case TT_LOOP:
+   {
+      List *p_list_block = list_new();
+      _NEXT
+      _block_get(p_interpret, p_list_block);
+      Token *p_token_backup = p_interpret->p_token;
+
+      /* Run forever; break is the only exit, next restarts the body */
+      for (;;) {
+         scope_up(p_interpret->p_scope);
+         interpret_subprocess(p_interpret, p_list_block);
+         scope_down(p_interpret->p_scope);
+
+         if (p_interpret->ct == CONTROL_BREAK) {
+            p_interpret->ct = CONTROL_NONE;
+            break;
+         } else if (p_interpret->ct == CONTROL_NEXT) {
+            p_interpret->ct = CONTROL_NONE;
+            /* skip the rest of the body; re-run from the top */
+         }
+      }
+
+      list_delete(p_list_block);
+      p_interpret->p_token = p_token_backup;
+      p_interpret->tt = token_get_tt(p_token_backup);
+      return (1);
+   }
+   break;
+   case TT_DO:
+   {
+      /* do { body } while expr;  or  do { body } until expr;
+       * The body always executes at least once; the condition is evaluated
+       * at the bottom of each iteration (post-condition loop). */
+      List *p_list_block = list_new();
+      List *p_list_expr  = list_new();
+
+      _NEXT
+      _block_get(p_interpret, p_list_block);  /* leaves at 'while'/'until' */
+
+      Token *p_token = p_interpret->p_token;
+      TokenType tt = p_interpret->tt;
+      if (tt != TT_WHILE && tt != TT_UNTIL)
+         _INTERPRET_ERROR(
+            "Expected 'while' or 'until' after 'do' block", p_token);
+
+      _NEXT   /* past 'while' or 'until' */
+
+      /* Collect condition tokens until ';' — mirrors _expression_get but
+       * stops at semicolon instead of '{' since there is no block here */
+      while (p_interpret->tt != TT_SEMICOLON
+             && p_interpret->tt != TT_NONE) {
+         list_add_back(p_list_expr, p_interpret->p_token);
+         _NEXT
+      }
+      _NEXT   /* past ';' */
+      Token *p_token_backup = p_interpret->p_token;  /* after ';' */
+
+      _Bool b_flag = true;
+      do {
+         scope_up(p_interpret->p_scope);
+         interpret_subprocess(p_interpret, p_list_block);
+         scope_down(p_interpret->p_scope);
+
+         /* Handle break/next before re-evaluating the condition */
+         if (p_interpret->ct == CONTROL_BREAK) {
+            p_interpret->ct = CONTROL_NONE;
+            b_flag = false;
+            continue;
+         } else if (p_interpret->ct == CONTROL_NEXT) {
+            p_interpret->ct = CONTROL_NONE;
+            /* fall through to condition check */
+         }
+
+         /* Re-evaluate condition using a temp stack/iterator over
+          * p_list_expr, exactly as the while/until loop does */
+         Stack *p_stack_backup = p_interpret->p_stack;
+         p_interpret->p_stack = stack_new();
+         ListIterator *p_iter_backup = p_interpret->p_iter;
+         p_interpret->p_iter = listiterator_new(p_list_expr);
+         _NEXT
+
+         if (_expression_(p_interpret)) {
+            Token *p_token_top = stack_pop(p_interpret->p_stack);
+            int i_val = convert_to_integer_get(p_token_top);
+            b_flag = (tt == TT_WHILE) ? (i_val != 0) : (i_val == 0);
+         }
+
+         listiterator_delete(p_interpret->p_iter);
+         p_interpret->p_iter = p_iter_backup;
+         stack_delete(p_interpret->p_stack);
+         p_interpret->p_stack = p_stack_backup;
+
+      } while (b_flag);
+
+      list_delete(p_list_block);
+      list_delete(p_list_expr);
+      p_interpret->p_token = p_token_backup;
+      p_interpret->tt = token_get_tt(p_token_backup);
+      return (1);
+   }
+   break;
    NO_DEFAULT;
    }
 

@@ -51,6 +51,8 @@ get_tt(char *c_token) {
    CHECK("until") TT_UNTIL;
    CHECK("int") TT_INT;
    CHECK("next") TT_NEXT;
+   CHECK("loop") TT_LOOP;
+   CHECK("do") TT_DO;
    CHECK("defined") TT_DEFINED;
    CHECK("undef") TT_UNDEF;
    CHECK("syms") TT_SYMS;
@@ -130,6 +132,8 @@ tt_get_name(TokenType tt_cur) {
       CASE(TT_WHILE,"TT_WHILE")
       CASE(TT_UNTIL,"TT_UNTIL")
       CASE(TT_NEXT,"TT_NEXT")
+      CASE(TT_LOOP,"TT_LOOP")
+      CASE(TT_DO,"TT_DO")
       CASE(TT_DEFINED,"TT_DEFINED")
       CASE(TT_UNDEF,"TT_UNDEF")
       CASE(TT_SYMS,"TT_SYMS")

@@ -109,6 +109,8 @@ typedef enum {
    TT_WHILE,
    TT_UNTIL,
    TT_NEXT,
+   TT_LOOP,
+   TT_DO,
    TT_INT,
    TT_DEFINED,
    TT_UNDEF,

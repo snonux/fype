@@ -69,3 +69,76 @@ Uncomment defines in `src/defines.h` to enable tracing:
 - `DEBUG_FUNCTION_PROCESS` — function dispatch
 - `DEBUG_TRACK` — interpreter step trace
 - `DEBUG_BLOCK_GET` / `DEBUG_EXPRESSION_GET` — sub-parser tracing
+
+## Coding Style
+
+### File headers
+
+Every source file begins with a license header using the special `/*:*` comment format:
+
+```c
+/*:*
+ *: File: ./src/core/token.h
+ *: A simple interpreter
+ *: 
+ *: WWW     : https://codeberg.org/snonux/fype
+ *: AUTHOR  : http://buetow.org
+ *: E-Mail  : fype at dev.buetow.org
+ *: 
+ *: Copyright (c) 2005 - 2008, Paul Buetow 
+ *: All rights reserved.
+ *: ...
+ *:*/
+```
+
+### Naming conventions
+
+| Category | Convention | Examples |
+|----------|------------|----------|
+| Types (structs, enums, typedefs) | `PascalCase` | `Token`, `TokenType`, `List`, `Scope` |
+| Functions | `module_action` (snake_case) | `token_new`, `list_add_back`, `scope_get` |
+| Variables | `prefix_name` with type prefix | `p_token` (pointer), `i_val` (int), `c_val` (char/string), `u_id` (unsigned) |
+| Macros/constants | `UPPER_SNAKE_CASE` | `TT_INTEGER`, `DEBUG_GC`, `NO_DEFAULT` |
+| Enum values | `MODULE_PREFIX_NAME` | `TT_INTEGER`, `TT_STRING`, `SYM_VARIABLE` |
+| Callbacks | `name_cb` | `token_delete_cb`, `token_print_cb` |
+| Static/private functions | `_prefix_name` | `_scope_get_hash`, `_list_copy_cb` |
+
+### Formatting
+
+- **Indentation**: 3 spaces (no tabs). Use `make astyle` to auto-format.
+- **Line length**: Maximum 80 characters. Use `make check` to verify.
+- **Braces**: K&R style (opening brace on same line as statement)
+- **Pointer asterisk**: Attached to variable name, not type: `Token *p_token`, not `Token* p_token`
+- **Return statements**: Parenthesize return values: `return (p_token);`
+
+### Function definition style
+
+Return type on its own line:
+
+```c
+Token*
+token_new(char *c_val, TokenType tt_cur, int i_line_nr,
+         int i_pos_nr, char *c_filename) {
+   Token *p_token = token_new_dummy();
+   // ...
+   return (p_token);
+}
+```
+
+### Header guards
+
+Traditional `#ifndef` pattern:
+
+```c
+#ifndef TOKEN_H
+#define TOKEN_H
+// ...
+#endif
+```
+
+### Comments
+
+- Block comments: `/* ... */`
+- Single-line notes: `// comment`
+- No inline comments trailing code on the same line for significant explanations
+

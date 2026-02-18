@@ -4,7 +4,7 @@ loop {
     i = i + 1;
     if i == 5 { break; }
 }
-say i;          # expected: 5
+assert 5 == say i;          # expected: 5
 
 # loop with next — skips j==3, so sum = 1+2+4+5 = 12
 my sum = 0;
@@ -15,18 +15,18 @@ loop {
     if j == 3 { next; }
     sum = sum + j;
 }
-say sum;        # expected: 12
+assert 12 == say sum;        # expected: 12
 
 # do...while — body runs once even though k >= 10 already
 my k = 10;
 do {
     k = k + 1;
 } while k < 10;
-say k;          # expected: 11
+assert 11 == say k;          # expected: 11
 
 # do...until — stops when m reaches 5
 my m = 0;
 do {
     m = m + 1;
 } until m == 5;
-say m;          # expected: 5
+assert 5 == say m;          # expected: 5

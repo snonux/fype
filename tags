@@ -1,313 +1,371 @@
-CASE	./src/core/token.c	/^#define CASE(t,r) case t: return r;$/
-CHECK	./src/core/token.c	/^#define CHECK(...) if (!strcmp(c_token, __VA_ARGS_/
-Mmain	./src/main.c	/^main(int i_argc, char **pc_argv) {$/
-_FUNCTIONS_ERROR	./src/core/functions.c	/^#define _FUNCTIONS_ERROR(m,t) \\$/
-_GARBAGE_ERROR	./src/core/garbage.c	/^#define _GARBAGE_ERROR(m) \\$/
-_Garbage	./src/core/garbage.c	/^} _Garbage;$/
-_INTERPRET_ERROR	./src/core/interpret.c	/^#define _INTERPRET_ERROR(m,t) \\$/
-_add_semicolon_to_list	./src/core/scanner.c	/^_add_semicolon_to_list(Scanner *p_scanner) {$/
-_block	./src/core/interpret.c	/^_block(Interpret *p_interpret) {$/
-_block_get	./src/core/interpret.c	/^_block_get(Interpret *p_interpret, List *p_list_bl/
-_block_skip	./src/core/interpret.c	/^_block_skip(Interpret *p_interpret) {$/
-_compare	./src/core/interpret.c	/^_compare(Interpret *p_interpret) {$/
-_control	./src/core/interpret.c	/^_control(Interpret *p_interpret) {$/
-_expression	./src/core/interpret.c	/^_expression(Interpret *p_interpret) {$/
-_expression_	./src/core/interpret.c	/^_expression_(Interpret *p_interpret) {$/
-_expression_get	./src/core/interpret.c	/^_expression_get(Interpret *p_interpret, List *p_li/
-_func_decl	./src/core/interpret.c	/^_func_decl(Interpret *p_interpret) {$/
-_indent	./src/data/tree.c	/^void _indent(int i_indent) {$/
-_list_copy_cb	./src/data/list.c	/^_list_copy_cb(void *p_void1, void *p_cpy) {$/
-_next	./src/core/interpret.c	/^_next(Interpret *p_interpret) {$/
-_next_tt	./src/core/interpret.c	/^_next_tt(Interpret *p_interpret) {$/
-_print_lookahead	./src/core/interpret.c	/^_print_lookahead(Interpret *p_interpret) {$/
-_proc_decl	./src/core/interpret.c	/^_proc_decl(Interpret *p_interpret) {$/
-_process	./src/core/functions.c	/^_process(Interpret *p_interpret, Token *p_token_st/
-_product	./src/core/interpret.c	/^_product(Interpret *p_interpret) {$/
-_product2	./src/core/interpret.c	/^_product2(Interpret *p_interpret) {$/
-_program	./src/core/interpret.c	/^_program(Interpret *p_interpret) {$/
-_scanner_get_next_char	./src/core/scanner.c	/^_scanner_get_next_char(Scanner *p_scanner) {$/
-_scanner_has_next_char	./src/core/scanner.c	/^_scanner_has_next_char(Scanner *p_scanner) {$/
-_scope_get_hash	./src/core/scope.c	/^_scope_get_hash(Scope *p_scope, char *c_key) {$/
-_scope_print_cb	./src/core/scope.c	/^_scope_print_cb(void *p_void, int i_level) {$/
-_statement	./src/core/interpret.c	/^_statement(Interpret *p_interpret) {$/
-_sum	./src/core/interpret.c	/^_sum(Interpret *p_interpret) {$/
-_term	./src/core/interpret.c	/^_term(Interpret *p_interpret) {$/
-_tree_print	./src/data/tree.c	/^_tree_print(TreeNode *p_treenode, int i_indent) {$/
-_tree_print_cb	./src/data/tree.c	/^_tree_print_cb(void *p_void, void *p_indent) {$/
-_tree_print_cb2	./src/data/tree.c	/^_tree_print_cb2(void *p_void, void *p_indent) {$/
-_unshift_cb	./src/data/array.c	/^_unshift_cb(void *p_array, void *p_void) {$/
-_var_assign	./src/core/interpret.c	/^_var_assign(Interpret *p_interpret) {$/
-_var_decl	./src/core/interpret.c	/^_var_decl(Interpret *p_interpret) {$/
-_var_list	./src/core/interpret.c	/^_var_list(Interpret *p_interpret) {$/
-argv_addopt	./src/argv.c	/^argv_addopt(char c_opt, Tupel *p_tupel_argv) {$/
-argv_check_argc	./src/argv.c	/^argv_check_argc(int i_required, unsigned i_argc_le/
-argv_checkopt	./src/argv.c	/^argv_checkopt(char c_opt, Tupel *p_tupel_argv) {$/
-argv_checkopts	./src/argv.c	/^argv_checkopts(char *c_opts, Tupel *p_tupel_argv) /
-argv_help	./src/argv.c	/^argv_help() {$/
-argv_run	./src/argv.c	/^argv_run(Fype *p_fype, int i_argc, char **pc_argv)/
-argv_switch	./src/argv.c	/^argv_switch(char c_arg, Tupel *p_tupel_argv, unsig/
-argv_synopsis	./src/argv.c	/^argv_synopsis(Tupel *p_tupel_argv) {$/
-argv_tupel_delete	./src/argv.c	/^argv_tupel_delete(Tupel *p_tupel_argv) {$/
-array_append	./src/data/array.c	/^array_append(Array *p_array, Array *p_array_append/
-array_defined	./src/data/array.c	/^array_defined(Array *p_array, int i_index) {$/
-array_delete	./src/data/array.c	/^array_delete(Array *p_array) {$/
-array_delete_iterate	./src/data/array.c	/^array_delete_iterate(Array *p_array, void (*func)(/
-array_get	./src/data/array.c	/^array_get(Array *p_array, int i_index) {$/
-array_insert	./src/data/array.c	/^array_insert(Array *p_array, int i_index, void *p_/
-array_iterate	./src/data/array.c	/^array_iterate(Array *p_array, void (*func)(void *)/
-array_iterate2	./src/data/array.c	/^array_iterate2(Array *p_array, void (*func)(void */
-array_new	./src/data/array.c	/^array_new() {$/
-array_new_copy	./src/data/array.c	/^array_new_copy(Array *p_array) {$/
-array_new_size	./src/data/array.c	/^array_new_size(int i_size) {$/
-array_print_int	./src/data/array.c	/^array_print_int(Array *p_array) {$/
-array_push	./src/data/array.c	/^array_push(Array *p_array, void *p_void) {$/
-array_remove	./src/data/array.c	/^array_remove(Array *p_array, int i_index) {$/
-array_resize	./src/data/array.c	/^array_resize(Array *p_array, int i_size) {$/
-array_set	./src/data/array.c	/^array_set(Array *p_array, int i_index, void *p_val/
-array_set_used	./src/data/array.c	/^array_set_used(Array *p_array, int i_used) {$/
-array_splice	./src/data/array.c	/^array_splice(Array *p_array, int i_index, Array *p/
-array_unshift	./src/data/array.c	/^array_unshift(Array *p_array, void *p_void) {$/
-arrayelement_delete	./src/data/array.c	/^arrayelement_delete(ArrayElement *p_ae) {$/
-arrayelement_new	./src/data/array.c	/^arrayelement_new(void *p_val) {$/
-arrayiterator_delete	./src/data/array.c	/^arrayiterator_delete(ArrayIterator *p_arrayiterato/
-arrayiterator_has_next	./src/data/array.c	/^arrayiterator_has_next(ArrayIterator *p_arrayitera/
-arrayiterator_new	./src/data/array.c	/^arrayiterator_new(Array *p_array) {$/
-arrayiterator_next	./src/data/array.c	/^arrayiterator_next(ArrayIterator *p_arrayiterator)/
-convert_function_arg_types_to_highest	./src/core/convert.c	/^convert_function_arg_types_to_highest(Stack *p_sta/
-convert_to_array	./src/core/convert.c	/^convert_to_array(Token *p_token) {$/
-convert_to_double	./src/core/convert.c	/^convert_to_double(Token *p_token) {$/
-convert_to_highest	./src/core/convert.c	/^convert_to_highest(Token *p_token1, Token *p_token/
-convert_to_integer	./src/core/convert.c	/^convert_to_integer(Token *p_token) {$/
-convert_to_integer_get	./src/core/convert.c	/^convert_to_integer_get(Token *p_token) {$/
-convert_to_string	./src/core/convert.c	/^convert_to_string(Token *p_token) {$/
-convert_to_tt	./src/core/convert.c	/^convert_to_tt(Token *p_token, TokenType tt) {$/
-dat_clear	./src/data/dat.c	/^dat_clear(Dat *p_dat) {$/
-dat_delete	./src/data/dat.c	/^dat_delete(Dat *p_dat) {$/
-dat_empty	./src/data/dat.c	/^dat_empty(Dat *p_dat) {$/
-dat_first	./src/data/dat.c	/^dat_first(Dat *p_dat) {$/
-dat_first_t	./src/data/dat.c	/^dat_first_t(Dat *p_dat, TYPE *p_type) {$/
-dat_iterate	./src/data/dat.c	/^dat_iterate(Dat *p_dat, void (*func)(void *)) {$/
-dat_iterate_t	./src/data/dat.c	/^dat_iterate_t(Dat *p_dat, void (*func)(void *, TYP/
-dat_iterate_tl	./src/data/dat.c	/^dat_iterate_tl(Dat *p_dat, void (*func)(void *, TY/
-dat_last	./src/data/dat.c	/^dat_last(Dat *p_dat) {$/
-dat_last_t	./src/data/dat.c	/^dat_last_t(Dat *p_dat, TYPE *p_type) {$/
-dat_new	./src/data/dat.c	/^dat_new() {$/
-dat_pop	./src/data/dat.c	/^dat_pop(Dat *p_dat) {$/
-dat_pop_t	./src/data/dat.c	/^dat_pop_t(Dat *p_dat, TYPE *p_type) {$/
-dat_push	./src/data/dat.c	/^dat_push(Dat *p_dat, void *p_val) {$/
-dat_push_t	./src/data/dat.c	/^dat_push_t(Dat *p_dat, void *p_val, TYPE type) {$/
-dat_second	./src/data/dat.c	/^dat_second(Dat *p_dat) {$/
-dat_second_t	./src/data/dat.c	/^dat_second_t(Dat *p_dat, TYPE *p_type) {$/
-dat_size	./src/data/dat.c	/^dat_size(Dat *p_dat) {$/
-datelem_new	./src/data/dat.c	/^datelem_new() {$/
-datelem_new_t	./src/data/dat.c	/^datelem_new_t(TYPE type) {$/
-datiter_dat	./src/data/dat.c	/^datiter_dat(DatIter *p_iter) {$/
-datiter_delete	./src/data/dat.c	/^datiter_delete(DatIter *p_iter) {$/
-datiter_left	./src/data/dat.c	/^datiter_left(DatIter *p_iter) {$/
-datiter_new	./src/data/dat.c	/^datiter_new(Dat *p_dat) {$/
-datiter_next	./src/data/dat.c	/^datiter_next(DatIter *p_iter) {$/
-datiter_next_t	./src/data/dat.c	/^datiter_next_t(DatIter *p_iter, TYPE *p_type) {$/
-datiter_skip	./src/data/dat.c	/^datiter_skip(DatIter *p_iter, unsigned i_num) {$/
-function_delete	./src/core/function.c	/^function_delete(Function *p_function) {$/
-function_is_buildin	./src/core/functions.c	/^function_is_buildin(Token *p_token_ident) {$/
-function_is_self_defined	./src/core/functions.c	/^function_is_self_defined(Interpret *p_interpret) {/
-function_new	./src/core/function.c	/^function_new() {$/
-function_process	./src/core/functions.c	/^function_process(Interpret *p_interpret, Token *p_/
-function_process_buildin	./src/core/functions.c	/^function_process_buildin(Interpret *p_interpret, T/
-function_process_self_defined	./src/core/functions.c	/^function_process_self_defined(Interpret *p_interpr/
-functions_delete	./src/core/functions.c	/^functions_delete(Functions *p_functions) {$/
-functions_init	./src/core/functions.c	/^functions_init(Functions *p_functions) {$/
-functions_new	./src/core/functions.c	/^functions_new() {$/
-fype_delete	./src/fype.c	/^fype_delete(Fype *p_fype) {$/
-fype_new	./src/fype.c	/^fype_new() {$/
-fype_run	./src/fype.c	/^fype_run(int i_argc, char **pc_argv) {$/
-garbage_add	./src/core/garbage.c	/^garbage_add(void *p, GarbageType type) {$/
-garbage_add2	./src/core/garbage.c	/^garbage_add2(void *p,$/
-garbage_add3	./src/core/garbage.c	/^garbage_add3(void *p,$/
-garbage_add_token	./src/core/garbage.c	/^garbage_add_token(Token *p_token) {$/
-garbage_collect	./src/core/garbage.c	/^garbage_collect() {$/
-garbage_destroy	./src/core/garbage.c	/^garbage_destroy() {$/
-garbage_init	./src/core/garbage.c	/^garbage_init() {$/
-get_tt	./src/core/token.c	/^get_tt(char *c_token) {$/
-hash_addrisfree	./src/data/hash.c	/^hash_addrisfree(Hash *p_hash, int i_addr) {$/
-hash_addrisocc	./src/data/hash.c	/^hash_addrisocc(Hash *p_hash, int i_addr, char *c_k/
-hash_delete	./src/data/hash.c	/^hash_delete(Hash *p_hash) {$/
-hash_get	./src/data/hash.c	/^hash_get(Hash *p_hash, char *c_key) {$/
-hash_get_ht	./src/data/hash.c	/^hash_get_ht(Hash *p_hash, char *c_key, TYPE *p_typ/
-hash_get_ht_addr	./src/data/hash.c	/^hash_get_ht_addr(Hash *p_hash, char *c_key, TYPE */
-hash_getaddr	./src/data/hash.c	/^hash_getaddr(Hash *p_hash, char *c_key, HASH_OP OP/
-hash_insert	./src/data/hash.c	/^hash_insert(Hash *p_hash, char *c_key, void *p_val/
-hash_insert_ht	./src/data/hash.c	/^hash_insert_ht(Hash *p_hash, char *c_key, void *p_/
-hash_iterate	./src/data/hash.c	/^hash_iterate(Hash *p_hash, void (*func)(void *)) {/
-hash_iterate_key	./src/data/hash.c	/^hash_iterate_key(Hash *p_hash, void (*func)(void */
-hash_new	./src/data/hash.c	/^hash_new(unsigned i_size) {$/
-hash_nextaddr	./src/data/hash.c	/^hash_nextaddr(Hash *p_hash, int i_max_tries, char /
-hash_print	./src/data/hash.c	/^hash_print(Hash *p_hash) {$/
-hash_print_addrval	./src/data/hash.c	/^hash_print_addrval(Hash *p_hash, int i_addr) {$/
-hash_remove	./src/data/hash.c	/^hash_remove(Hash *p_hash, char *c_key) {$/
-hash_size	./src/data/hash.c	/^hash_size(Hash *p_hash, int i_size) {$/
-interpret_delete	./src/core/interpret.c	/^interpret_delete(Interpret *p_interpret) {$/
-interpret_new	./src/core/interpret.c	/^interpret_new(List *p_list_token, Hash *p_hash_sym/
-interpret_process	./src/core/interpret.c	/^interpret_process(Interpret *p_interpret) {$/
-interpret_run	./src/core/interpret.c	/^interpret_run(Fype *p_fype) {$/
-interpret_subprocess	./src/core/interpret.c	/^interpret_subprocess(Interpret *p_interpret, List /
-list_add_back	./src/data/list.c	/^list_add_back(List *p_list, void *p_val) {$/
-list_add_front	./src/data/list.c	/^list_add_front(List *p_list, void *p_val) {$/
-list_clear	./src/data/list.c	/^list_clear(List *p_list) {$/
-list_clear_and_free_vals	./src/data/list.c	/^list_clear_and_free_vals(List *p_list) {$/
-list_concat_back	./src/data/list.c	/^list_concat_back(List *p_list1, List *p_list2) {$/
-list_concat_front	./src/data/list.c	/^list_concat_front(List *p_list1, List *p_list2) {$/
-list_copy	./src/data/list.c	/^list_copy(List *p_list) {$/
-list_copy2	./src/data/list.c	/^list_copy2(List *p_list, void* (*func)(void *)) {$/
-list_delete	./src/data/list.c	/^list_delete(List *p_list) {$/
-list_delete_and_free_vals	./src/data/list.c	/^list_delete_and_free_vals(List *p_list) {$/
-list_delete_cb	./src/data/list.c	/^list_delete_cb(void *p_list) {$/
-list_empty	./src/data/list.c	/^list_empty(List *p_list) {$/
-list_iterate	./src/data/list.c	/^list_iterate(List *p_list, void (*func)(void *)) {/
-list_iterate2	./src/data/list.c	/^list_iterate2(List *p_list, void (*func)(void *, v/
-list_iterate2_ptr	./src/data/list.c	/^list_iterate2_ptr(List *p_list, void (*func)(void /
-list_iterate3	./src/data/list.c	/^list_iterate3(List *p_list,$/
-list_iterate3_ptr	./src/data/list.c	/^list_iterate3_ptr(List *p_list,$/
-list_new	./src/data/list.c	/^list_new() {$/
-list_remove_back	./src/data/list.c	/^list_remove_back(List *p_list) {$/
-list_remove_elem	./src/data/list.c	/^list_remove_elem(List *p_list, ListElem *p_elem_re/
-list_remove_front	./src/data/list.c	/^list_remove_front(List *p_list) {$/
-list_size	./src/data/list.c	/^list_size(List *p_list) {$/
-listelem_new	./src/data/list.c	/^listelem_new() {$/
-listiterator_current	./src/data/list.c	/^listiterator_current(ListIterator *p_iter) {$/
-listiterator_delete	./src/data/list.c	/^listiterator_delete(ListIterator *p_iter) {$/
-listiterator_end	./src/data/list.c	/^listiterator_end(ListIterator *p_iter) {$/
-listiterator_get_state	./src/data/list.c	/^listiterator_get_state(ListIterator *p_iter) {$/
-listiterator_has_next	./src/data/list.c	/^listiterator_has_next(ListIterator *p_iter) {$/
-listiterator_new	./src/data/list.c	/^listiterator_new(List *p_list) {$/
-listiterator_new_reverse	./src/data/list.c	/^listiterator_new_reverse(List *p_list) {$/
-listiterator_next	./src/data/list.c	/^listiterator_next(ListIterator *p_iter) {$/
-listiterator_next_elem	./src/data/list.c	/^listiterator_next_elem(ListIterator *p_iter) {$/
-listiterator_prev	./src/data/list.c	/^listiterator_prev(ListIterator *p_iter) {$/
-listiterator_set_state	./src/data/list.c	/^listiterator_set_state(ListIterator *p_iter, ListI/
-listiteratorstate_delete	./src/data/list.c	/^listiteratorstate_delete(ListIteratorState *p_stat/
-map_clear	./src/data/map.c	/^map_clear(Map *p_map) {$/
-map_clear_and_free_vals	./src/data/map.c	/^map_clear_and_free_vals(Map *p_map) {$/
-map_delete	./src/data/map.c	/^map_delete(Map *p_map) {$/
-map_delete_and_free_vals	./src/data/map.c	/^map_delete_and_free_vals(Map *p_map) {$/
-map_empty	./src/data/map.c	/^map_empty(Map *p_map) {$/
-map_exists	./src/data/map.c	/^map_exists(Map *p_map, char *c_key) {$/
-map_exists2	./src/data/map.c	/^map_exists2(Map *p_map, char *c_key1, char *c_key2/
-map_full	./src/data/map.c	/^map_full(Map *p_map) {$/
-map_get	./src/data/map.c	/^map_get(Map *p_map, char *c_key) {$/
-map_get2	./src/data/map.c	/^map_get2(Map *p_map, char *c_key1, char *c_key2) {/
-map_get_addr	./src/data/map.c	/^map_get_addr(Map *p_map, char *c_key) {$/
-map_get_key	./src/data/map.c	/^map_get_key(Map *p_map, void *p_val) {$/
-map_insert	./src/data/map.c	/^map_insert(Map *p_map, char *c_key, void *p_val) {/
-map_insert2	./src/data/map.c	/^map_insert2(Map *p_map, char *c_key1, char *c_key2/
-map_insert_if_not_exists	./src/data/map.c	/^map_insert_if_not_exists(Map *p_map, char *c_key, /
-map_iterate	./src/data/map.c	/^map_iterate(Map *p_map, void (*func) (void *)) {$/
-map_iterate2	./src/data/map.c	/^map_iterate2(Map *p_map, void (*func) (void *, voi/
-map_iterate2_keys	./src/data/map.c	/^map_iterate2_keys(Map *p_map,$/
-map_iterate3	./src/data/map.c	/^map_iterate3(Map *p_map,$/
-map_iterate3_keys	./src/data/map.c	/^map_iterate3_keys(Map *p_map,$/
-map_iterate_keys	./src/data/map.c	/^map_iterate_keys(Map *p_map, void (*func) (void *,/
-map_new	./src/data/map.c	/^map_new(int i_max_size) {$/
-map_new_named	./src/data/map.c	/^map_new_named(int i_max_size, char *c_name) {$/
-map_next_free_addr	./src/data/map.c	/^map_next_free_addr(Map *p_map) {$/
-map_print	./src/data/map.c	/^map_print(Map *p_map) {$/
-map_remove	./src/data/map.c	/^map_remove(Map *p_map, char *c_key) {$/
-queue_clear	./src/data/queue.c	/^queue_clear(Queue *p_queue) {$/
-queue_delete	./src/data/queue.c	/^queue_delete(Queue *p_queue) {$/
-queue_empty	./src/data/queue.c	/^queue_empty(Queue *p_queue) {$/
-queue_iterate	./src/data/queue.c	/^queue_iterate(Queue *p_queue, void (*func)(void *)/
-queue_iterate_t	./src/data/queue.c	/^queue_iterate_t(Queue *p_queue, void (*func)(void /
-queue_iterate_tl	./src/data/queue.c	/^queue_iterate_tl(Queue *p_queue, void (*func)(void/
-queue_new	./src/data/queue.c	/^queue_new() {$/
-queue_pop	./src/data/queue.c	/^queue_pop(Queue *p_queue) {$/
-queue_pop_t	./src/data/queue.c	/^queue_pop_t(Queue *p_queue, TYPE *p_type) {$/
-queue_push	./src/data/queue.c	/^queue_push(Queue *p_queue, void *p_val) {$/
-queue_push_t	./src/data/queue.c	/^queue_push_t(Queue *p_queue, void *p_val, TYPE typ/
-queue_size	./src/data/queue.c	/^queue_size(Queue *p_queue) {$/
-queueelem_new	./src/data/queue.c	/^queueelem_new() {$/
-queueelem_new_t	./src/data/queue.c	/^queueelem_new_t(TYPE type) {$/
-queueiter_delete	./src/data/queue.c	/^queueiter_delete(QueueIter *p_iter) {$/
-queueiter_left	./src/data/queue.c	/^queueiter_left(QueueIter *p_iter) {$/
-queueiter_new	./src/data/queue.c	/^queueiter_new(Queue *p_queue) {$/
-queueiter_next	./src/data/queue.c	/^queueiter_next(QueueIter *p_iter) {$/
-queueiter_next_t	./src/data/queue.c	/^queueiter_next_t(QueueIter *p_iter, TYPE *p_type) /
-queueiter_queue	./src/data/queue.c	/^queueiter_queue(QueueIter *p_iter) {$/
-reference_delete	./src/core/reference.c	/^reference_delete(Reference *p_reference) {$/
-reference_delete_cb	./src/core/reference.c	/^reference_delete_cb(void *p_void) {$/
-reference_new	./src/core/reference.c	/^reference_new(Symbol *p_symbol) {$/
-scanner_add_token	./src/core/scanner.c	/^scanner_add_token(Scanner *p_scanner, char **cc_to/
-scanner_cleanup_list_token_cb	./src/core/scanner.c	/^scanner_cleanup_list_token_cb(void *p_void) {$/
-scanner_delete	./src/core/scanner.c	/^scanner_delete(Scanner *p_scanner) {$/
-scanner_get_tt_cur	./src/core/scanner.c	/^scanner_get_tt_cur(char *c_token) {$/
-scanner_new	./src/core/scanner.c	/^scanner_new(List *p_list_token, Tupel *p_tupel_arg/
-scanner_post_task	./src/core/scanner.c	/^scanner_post_task(Scanner *p_scanner) {$/
-scanner_run	./src/core/scanner.c	/^scanner_run(Fype *p_fype) {$/
-scope_delete	./src/core/scope.c	/^scope_delete(Scope *p_scope) {$/
-scope_down	./src/core/scope.c	/^scope_down(Scope *p_scope) {$/
-scope_exists	./src/core/scope.c	/^scope_exists(Scope *p_scope, char *c_key) {$/
-scope_get	./src/core/scope.c	/^scope_get(Scope *p_scope, char *c_key) {$/
-scope_new	./src/core/scope.c	/^scope_new(Hash *p_hash_syms) {$/
-scope_newset	./src/core/scope.c	/^scope_newset(Scope *p_scope, char *c_key, Symbol */
-scope_print	./src/core/scope.c	/^scope_print(Scope *p_scope) {$/
-scope_remove	./src/core/scope.c	/^scope_remove(Scope *p_scope, char *c_key) {$/
-scope_reset	./src/core/scope.c	/^scope_reset(Scope *p_scope, char *c_key, Symbol *p/
-scope_up	./src/core/scope.c	/^scope_up(Scope *p_scope) {$/
-stack_clear	./src/data/stack.c	/^stack_clear(Stack *p_stack) {$/
-stack_concat	./src/data/stack.c	/^stack_concat(Stack *p_stack, Stack *p_stack_concat/
-stack_delete	./src/data/stack.c	/^stack_delete(Stack *p_stack) {$/
-stack_delete_and_free	./src/data/stack.c	/^stack_delete_and_free(Stack *p_stack) {$/
-stack_empty	./src/data/stack.c	/^stack_empty(Stack *p_stack) {$/
-stack_iterate	./src/data/stack.c	/^stack_iterate(Stack *p_stack, void (*func)(void *p/
-stack_iterate2	./src/data/stack.c	/^stack_iterate2(Stack *p_stack, void (*func)(void */
-stack_iterate_level	./src/data/stack.c	/^stack_iterate_level(Stack *p_stack, void (*func)(v/
-stack_merge	./src/data/stack.c	/^stack_merge(Stack *p_stack, Stack *p_stack_merge) /
-stack_new	./src/data/stack.c	/^stack_new() {$/
-stack_pop	./src/data/stack.c	/^stack_pop(Stack *p_stack) {$/
-stack_push	./src/data/stack.c	/^stack_push(Stack *p_stack, void *p_val) {$/
-stack_size	./src/data/stack.c	/^stack_size(Stack *p_stack) {$/
-stack_top	./src/data/stack.c	/^stack_top(Stack *p_stack) {$/
-stackelem_new	./src/data/stack.c	/^stackelem_new() {$/
-stackiterator_delete	./src/data/stack.c	/^stackiterator_delete(StackIterator *p_iter) {$/
-stackiterator_has_next	./src/data/stack.c	/^stackiterator_has_next(StackIterator *p_iter) {$/
-stackiterator_new	./src/data/stack.c	/^stackiterator_new(Stack *p_stack) {$/
-stackiterator_next	./src/data/stack.c	/^stackiterator_next(StackIterator *p_iter) {$/
-stackiterator_remove_prev	./src/data/stack.c	/^stackiterator_remove_prev(StackIterator *p_iter) {/
-sym_get_name	./src/core/symbol.c	/^sym_get_name(SymbolType sym) {$/
-symbol_cleanup_hash_syms_cb	./src/core/symbol.c	/^symbol_cleanup_hash_syms_cb(void *p_void) {$/
-symbol_delete	./src/core/symbol.c	/^symbol_delete(Symbol *p_symbol) {$/
-symbol_new	./src/core/symbol.c	/^symbol_new(SymbolType sym, void *p_val) {$/
-symbol_print	./src/core/symbol.c	/^symbol_print(Symbol *p_symbol, char *c_key) {$/
-symbol_print_cb	./src/core/symbol.c	/^symbol_print_cb(void *p_void, char *c_key) {$/
-token_copy_cb	./src/core/token.c	/^token_copy_cb(void *p_void) {$/
-token_copy_vals	./src/core/token.c	/^void token_copy_vals(Token *p_token_to, Token *p_t/
-token_delete	./src/core/token.c	/^token_delete(Token *p_token) {$/
-token_delete_cb	./src/core/token.c	/^token_delete_cb(void *p_void) {$/
-token_new	./src/core/token.c	/^token_new(char *c_val, TokenType tt_cur, int i_lin/
-token_new_	./src/core/token.c	/^token_new_(char *c_val, TokenType tt_cur, char *c_/
-token_new_array	./src/core/token.c	/^token_new_array(int i_size) {$/
-token_new_copy	./src/core/token.c	/^token_new_copy(Token *p_token) {$/
-token_new_double	./src/core/token.c	/^token_new_double(double d_val) {$/
-token_new_dummy	./src/core/token.c	/^token_new_dummy() {$/
-token_new_integer	./src/core/token.c	/^token_new_integer(int i_val) {$/
-token_new_string	./src/core/token.c	/^token_new_string(char *c_val) {$/
-token_print	./src/core/token.c	/^token_print(Token *p_token) {$/
-token_print_cb	./src/core/token.c	/^token_print_cb(void *p_void) {$/
-token_print_val	./src/core/token.c	/^token_print_val(Token *p_token) {$/
-token_ref_down_cb	./src/core/token.c	/^token_ref_down_cb(void *p_void) {$/
-tree_delete	./src/data/tree.c	/^tree_delete(Tree *p_tree) {$/
-tree_new	./src/data/tree.c	/^tree_new() {$/
-tree_print	./src/data/tree.c	/^tree_print(Tree *p_tree) {$/
-treeiterator_delete	./src/data/tree.c	/^treeiterator_delete(TreeIterator *p_iter) {$/
-treeiterator_has_next	./src/data/tree.c	/^treeiterator_has_next(TreeIterator *p_iter) {$/
-treeiterator_new	./src/data/tree.c	/^treeiterator_new(Tree *p_tree) {$/
-treeiterator_next	./src/data/tree.c	/^treeiterator_next(TreeIterator *p_iter) {$/
-treeiteratorstate_delete	./src/data/tree.c	/^treeiteratorstate_delete(TreeIteratorState *p_stat/
-treeiteratorstate_new	./src/data/tree.c	/^treeiteratorstate_new(TreeNode *ptn) {$/
-treenode_delete	./src/data/tree.c	/^treenode_delete(TreeNode *p_treenode) {$/
-treenode_insert_left	./src/data/tree.c	/^treenode_insert_left(TreeNode *p_treenode, TreeNod/
-treenode_insert_right	./src/data/tree.c	/^treenode_insert_right(TreeNode *p_treenode, TreeNo/
-treenode_new	./src/data/tree.c	/^treenode_new(void *p_val) {$/
-treenode_new2	./src/data/tree.c	/^treenode_new2(void *p_val, void *p_val2) {$/
-tt_get_name	./src/core/token.c	/^tt_get_name(TokenType tt_cur) {$/
-tupel_delete	./src/data/tupel.c	/^tupel_delete(Tupel *p_tupel) {$/
-tupel_new	./src/data/tupel.c	/^tupel_new() {$/
+!_TAG_EXTRA_DESCRIPTION	anonymous	/Include tags for non-named objects like lambda/
+!_TAG_EXTRA_DESCRIPTION	fileScope	/Include tags of file scope/
+!_TAG_EXTRA_DESCRIPTION	pseudo	/Include pseudo tags/
+!_TAG_EXTRA_DESCRIPTION	subparser	/Include tags generated by subparsers/
+!_TAG_FIELD_DESCRIPTION	epoch	/the last modified time of the input file (only for F\/file kind tag)/
+!_TAG_FIELD_DESCRIPTION	file	/File-restricted scoping/
+!_TAG_FIELD_DESCRIPTION	input	/input file/
+!_TAG_FIELD_DESCRIPTION	name	/tag name/
+!_TAG_FIELD_DESCRIPTION	pattern	/pattern/
+!_TAG_FIELD_DESCRIPTION	typeref	/Type and name of a variable or typedef/
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_KIND_DESCRIPTION!C	d,macro	/macro definitions/
+!_TAG_KIND_DESCRIPTION!C	e,enumerator	/enumerators (values inside an enumeration)/
+!_TAG_KIND_DESCRIPTION!C	f,function	/function definitions/
+!_TAG_KIND_DESCRIPTION!C	g,enum	/enumeration names/
+!_TAG_KIND_DESCRIPTION!C	h,header	/included header files/
+!_TAG_KIND_DESCRIPTION!C	m,member	/struct, and union members/
+!_TAG_KIND_DESCRIPTION!C	s,struct	/structure names/
+!_TAG_KIND_DESCRIPTION!C	t,typedef	/typedefs/
+!_TAG_KIND_DESCRIPTION!C	u,union	/union names/
+!_TAG_KIND_DESCRIPTION!C	v,variable	/variable definitions/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_OUTPUT_VERSION	1.1	/current.age/
+!_TAG_PARSER_VERSION!C	1.1	/current.age/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/paul/git/fype/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	6.2.1	//
+!_TAG_ROLE_DESCRIPTION!C!function	foreigndecl	/declared in foreign languages/
+!_TAG_ROLE_DESCRIPTION!C!header	local	/local header/
+!_TAG_ROLE_DESCRIPTION!C!header	system	/system header/
+!_TAG_ROLE_DESCRIPTION!C!macro	undef	/undefined/
+!_TAG_ROLE_DESCRIPTION!C!struct	foreigndecl	/declared in foreign languages/
+ARGV_OSLEN	./src/argv.c	/^#define ARGV_OSLEN /;"	d	file:
+BINARY	./src/argv.c	/^char *BINARY;$/;"	v	typeref:typename:char *
+CASE	./src/core/token.c	/^#define CASE(/;"	d	file:
+CHECK	./src/core/token.c	/^#define CHECK(/;"	d	file:
+LIST_GARBAGE	./src/core/garbage.c	/^List *LIST_GARBAGE = NULL;$/;"	v	typeref:typename:List *
+TOKEN_ID_COUNTER	./src/core/token.c	/^long TOKEN_ID_COUNTER = 0;$/;"	v	typeref:typename:long
+_ADD_SEMICOLON_INDEX	./src/core/scanner.c	/^#define _ADD_SEMICOLON_INDEX /;"	d	file:
+_CHECK	./src/core/interpret.c	/^#define _CHECK /;"	d	file:
+_CODESTR_INDEX	./src/core/scanner.c	/^int _CODESTR_INDEX = 0;$/;"	v	typeref:typename:int
+_FUNCTIONS_ERROR	./src/core/functions.c	/^#define _FUNCTIONS_ERROR(/;"	d	file:
+_GARBAGE_ERROR	./src/core/garbage.c	/^#define _GARBAGE_ERROR(/;"	d	file:
+_Garbage	./src/core/garbage.c	/^} _Garbage;$/;"	t	typeref:struct:__anoneaa3b3cb0108	file:
+_HAS_NEXT	./src/core/interpret.c	/^#define _HAS_NEXT /;"	d	file:
+_INTERPRET_ERROR	./src/core/interpret.c	/^#define _INTERPRET_ERROR(/;"	d	file:
+_NEXT	./src/core/interpret.c	/^#define _NEXT /;"	d	file:
+_NEXT2	./src/core/interpret.c	/^#define _NEXT2 /;"	d	file:
+_NEXT_ORG	./src/core/interpret.c	/^#define _NEXT_ORG /;"	d	file:
+_NEXT_TT	./src/core/interpret.c	/^#define _NEXT_TT /;"	d	file:
+_SKIP	./src/core/interpret.c	/^#define _SKIP /;"	d	file:
+_TOKENENDS	./src/core/scanner.c	/^const char _TOKENENDS[] = "}])+-*\/={([<>;:,.!";$/;"	v	typeref:typename:const char[]
+__anoneaa3b3cb0108	./src/core/garbage.c	/^typedef struct {$/;"	s	file:
+_add_semicolon_to_list	./src/core/scanner.c	/^_add_semicolon_to_list(Scanner *p_scanner) {$/;"	f	typeref:typename:void
+_block	./src/core/interpret.c	/^_block(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_block_get	./src/core/interpret.c	/^_block_get(Interpret *p_interpret, List *p_list_block) {$/;"	f	typeref:typename:int
+_block_skip	./src/core/interpret.c	/^_block_skip(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_compare	./src/core/interpret.c	/^_compare(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_control	./src/core/interpret.c	/^_control(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_expression	./src/core/interpret.c	/^_expression(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_expression_	./src/core/interpret.c	/^_expression_(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_expression_get	./src/core/interpret.c	/^_expression_get(Interpret *p_interpret, List *p_list_expression) {$/;"	f	typeref:typename:int
+_func_decl	./src/core/interpret.c	/^_func_decl(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_indent	./src/data/tree.c	/^void _indent(int i_indent) {$/;"	f	typeref:typename:void
+_list_copy_cb	./src/data/list.c	/^_list_copy_cb(void *p_void1, void *p_cpy) {$/;"	f	typeref:typename:void
+_next	./src/core/interpret.c	/^_next(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_next_tt	./src/core/interpret.c	/^_next_tt(Interpret *p_interpret) {$/;"	f	typeref:typename:TokenType
+_print_lookahead	./src/core/interpret.c	/^_print_lookahead(Interpret *p_interpret) {$/;"	f	typeref:typename:void
+_proc_decl	./src/core/interpret.c	/^_proc_decl(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_process	./src/core/functions.c	/^_process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,$/;"	f	typeref:typename:void
+_product	./src/core/interpret.c	/^_product(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_product2	./src/core/interpret.c	/^_product2(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_program	./src/core/interpret.c	/^_program(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_scanner_get_next_char	./src/core/scanner.c	/^_scanner_get_next_char(Scanner *p_scanner) {$/;"	f	typeref:typename:char
+_scanner_has_next_char	./src/core/scanner.c	/^_scanner_has_next_char(Scanner *p_scanner) {$/;"	f	typeref:typename:_Bool
+_scope_get_hash	./src/core/scope.c	/^_scope_get_hash(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:Hash *	file:
+_scope_print_cb	./src/core/scope.c	/^_scope_print_cb(void *p_void, int i_level) {$/;"	f	typeref:typename:void
+_statement	./src/core/interpret.c	/^_statement(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_sum	./src/core/interpret.c	/^_sum(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_term	./src/core/interpret.c	/^_term(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_tree_print	./src/data/tree.c	/^_tree_print(TreeNode *p_treenode, int i_indent) {$/;"	f	typeref:typename:void
+_tree_print_cb	./src/data/tree.c	/^_tree_print_cb(void *p_void, void *p_indent) {$/;"	f	typeref:typename:void
+_tree_print_cb2	./src/data/tree.c	/^_tree_print_cb2(void *p_void, void *p_indent) {$/;"	f	typeref:typename:void
+_unshift_cb	./src/data/array.c	/^_unshift_cb(void *p_array, void *p_void) {$/;"	f	typeref:typename:void
+_var_assign	./src/core/interpret.c	/^_var_assign(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_var_decl	./src/core/interpret.c	/^_var_decl(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_var_list	./src/core/interpret.c	/^_var_list(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+argv_addopt	./src/argv.c	/^argv_addopt(char c_opt, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:void
+argv_check_argc	./src/argv.c	/^argv_check_argc(int i_required, unsigned i_argc_left, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:void
+argv_checkopt	./src/argv.c	/^argv_checkopt(char c_opt, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:_Bool
+argv_checkopts	./src/argv.c	/^argv_checkopts(char *c_opts, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:_Bool
+argv_help	./src/argv.c	/^argv_help() {$/;"	f	typeref:typename:void
+argv_run	./src/argv.c	/^argv_run(Fype *p_fype, int i_argc, char **pc_argv) {$/;"	f	typeref:typename:void
+argv_switch	./src/argv.c	/^argv_switch(char c_arg, Tupel *p_tupel_argv, unsigned i_argc_left) {$/;"	f	typeref:typename:void
+argv_synopsis	./src/argv.c	/^argv_synopsis(Tupel *p_tupel_argv) {$/;"	f	typeref:typename:void
+argv_tupel_delete	./src/argv.c	/^argv_tupel_delete(Tupel *p_tupel_argv) {$/;"	f	typeref:typename:void
+array_append	./src/data/array.c	/^array_append(Array *p_array, Array *p_array_append) {$/;"	f	typeref:typename:void
+array_defined	./src/data/array.c	/^array_defined(Array *p_array, int i_index) {$/;"	f	typeref:typename:_Bool
+array_delete	./src/data/array.c	/^array_delete(Array *p_array) {$/;"	f	typeref:typename:void
+array_delete_iterate	./src/data/array.c	/^array_delete_iterate(Array *p_array, void (*func)(void *)) {$/;"	f	typeref:typename:void
+array_get	./src/data/array.c	/^array_get(Array *p_array, int i_index) {$/;"	f	typeref:typename:void *
+array_insert	./src/data/array.c	/^array_insert(Array *p_array, int i_index, void *p_val) {$/;"	f	typeref:typename:void
+array_iterate	./src/data/array.c	/^array_iterate(Array *p_array, void (*func)(void *)) {$/;"	f	typeref:typename:void
+array_iterate2	./src/data/array.c	/^array_iterate2(Array *p_array, void (*func)(void *, void *), void *p_void) {$/;"	f	typeref:typename:void
+array_new	./src/data/array.c	/^array_new() {$/;"	f	typeref:typename:Array *
+array_new_copy	./src/data/array.c	/^array_new_copy(Array *p_array) {$/;"	f	typeref:typename:Array *
+array_new_size	./src/data/array.c	/^array_new_size(int i_size) {$/;"	f	typeref:typename:Array *
+array_print_int	./src/data/array.c	/^array_print_int(Array *p_array) {$/;"	f	typeref:typename:void
+array_push	./src/data/array.c	/^array_push(Array *p_array, void *p_void) {$/;"	f	typeref:typename:void
+array_remove	./src/data/array.c	/^array_remove(Array *p_array, int i_index) {$/;"	f	typeref:typename:void *
+array_resize	./src/data/array.c	/^array_resize(Array *p_array, int i_size) {$/;"	f	typeref:typename:void
+array_set	./src/data/array.c	/^array_set(Array *p_array, int i_index, void *p_val) {$/;"	f	typeref:typename:void
+array_set_used	./src/data/array.c	/^array_set_used(Array *p_array, int i_used) {$/;"	f	typeref:typename:void
+array_splice	./src/data/array.c	/^array_splice(Array *p_array, int i_index, Array *p_array2) {$/;"	f	typeref:typename:void
+array_unshift	./src/data/array.c	/^array_unshift(Array *p_array, void *p_void) {$/;"	f	typeref:typename:void
+arrayelement_delete	./src/data/array.c	/^arrayelement_delete(ArrayElement *p_ae) {$/;"	f	typeref:typename:void
+arrayelement_new	./src/data/array.c	/^arrayelement_new(void *p_val) {$/;"	f	typeref:typename:ArrayElement *
+arrayiterator_delete	./src/data/array.c	/^arrayiterator_delete(ArrayIterator *p_arrayiterator) {$/;"	f	typeref:typename:void
+arrayiterator_has_next	./src/data/array.c	/^arrayiterator_has_next(ArrayIterator *p_arrayiterator) {$/;"	f	typeref:typename:_Bool
+arrayiterator_new	./src/data/array.c	/^arrayiterator_new(Array *p_array) {$/;"	f	typeref:typename:ArrayIterator *
+arrayiterator_next	./src/data/array.c	/^arrayiterator_next(ArrayIterator *p_arrayiterator) {$/;"	f	typeref:typename:void *
+convert_function_arg_types_to_highest	./src/core/convert.c	/^convert_function_arg_types_to_highest(Stack *p_stack_args, int i_args) {$/;"	f	typeref:typename:TokenType
+convert_to_array	./src/core/convert.c	/^convert_to_array(Token *p_token) {$/;"	f	typeref:typename:void
+convert_to_double	./src/core/convert.c	/^convert_to_double(Token *p_token) {$/;"	f	typeref:typename:void
+convert_to_highest	./src/core/convert.c	/^convert_to_highest(Token *p_token1, Token *p_token2) {$/;"	f	typeref:typename:TokenType
+convert_to_integer	./src/core/convert.c	/^convert_to_integer(Token *p_token) {$/;"	f	typeref:typename:void
+convert_to_integer_get	./src/core/convert.c	/^convert_to_integer_get(Token *p_token) {$/;"	f	typeref:typename:int
+convert_to_string	./src/core/convert.c	/^convert_to_string(Token *p_token) {$/;"	f	typeref:typename:void
+convert_to_tt	./src/core/convert.c	/^convert_to_tt(Token *p_token, TokenType tt) {$/;"	f	typeref:typename:void
+dat_clear	./src/data/dat.c	/^dat_clear(Dat *p_dat) {$/;"	f	typeref:typename:void
+dat_delete	./src/data/dat.c	/^dat_delete(Dat *p_dat) {$/;"	f	typeref:typename:void
+dat_empty	./src/data/dat.c	/^dat_empty(Dat *p_dat) {$/;"	f	typeref:typename:_Bool
+dat_first	./src/data/dat.c	/^dat_first(Dat *p_dat) {$/;"	f	typeref:typename:void *
+dat_first_t	./src/data/dat.c	/^dat_first_t(Dat *p_dat, TYPE *p_type) {$/;"	f	typeref:typename:void *
+dat_iterate	./src/data/dat.c	/^dat_iterate(Dat *p_dat, void (*func)(void *)) {$/;"	f	typeref:typename:void
+dat_iterate_t	./src/data/dat.c	/^dat_iterate_t(Dat *p_dat, void (*func)(void *, TYPE)) {$/;"	f	typeref:typename:void
+dat_iterate_tl	./src/data/dat.c	/^dat_iterate_tl(Dat *p_dat, void (*func)(void *, TYPE, _Bool)) {$/;"	f	typeref:typename:void
+dat_last	./src/data/dat.c	/^dat_last(Dat *p_dat) {$/;"	f	typeref:typename:void *
+dat_last_t	./src/data/dat.c	/^dat_last_t(Dat *p_dat, TYPE *p_type) {$/;"	f	typeref:typename:void *
+dat_new	./src/data/dat.c	/^dat_new() {$/;"	f	typeref:typename:Dat *
+dat_pop	./src/data/dat.c	/^dat_pop(Dat *p_dat) {$/;"	f	typeref:typename:void *
+dat_pop_t	./src/data/dat.c	/^dat_pop_t(Dat *p_dat, TYPE *p_type) {$/;"	f	typeref:typename:void *
+dat_push	./src/data/dat.c	/^dat_push(Dat *p_dat, void *p_val) {$/;"	f	typeref:typename:void
+dat_push_t	./src/data/dat.c	/^dat_push_t(Dat *p_dat, void *p_val, TYPE type) {$/;"	f	typeref:typename:void
+dat_second	./src/data/dat.c	/^dat_second(Dat *p_dat) {$/;"	f	typeref:typename:void *
+dat_second_t	./src/data/dat.c	/^dat_second_t(Dat *p_dat, TYPE *p_type) {$/;"	f	typeref:typename:void *
+dat_size	./src/data/dat.c	/^dat_size(Dat *p_dat) {$/;"	f	typeref:typename:unsigned
+datelem_new	./src/data/dat.c	/^datelem_new() {$/;"	f	typeref:typename:DatElem *
+datelem_new_t	./src/data/dat.c	/^datelem_new_t(TYPE type) {$/;"	f	typeref:typename:DatElem *
+datiter_dat	./src/data/dat.c	/^datiter_dat(DatIter *p_iter) {$/;"	f	typeref:typename:Dat *
+datiter_delete	./src/data/dat.c	/^datiter_delete(DatIter *p_iter) {$/;"	f	typeref:typename:void
+datiter_left	./src/data/dat.c	/^datiter_left(DatIter *p_iter) {$/;"	f	typeref:typename:unsigned
+datiter_new	./src/data/dat.c	/^datiter_new(Dat *p_dat) {$/;"	f	typeref:typename:DatIter *
+datiter_next	./src/data/dat.c	/^datiter_next(DatIter *p_iter) {$/;"	f	typeref:typename:void *
+datiter_next_t	./src/data/dat.c	/^datiter_next_t(DatIter *p_iter, TYPE *p_type) {$/;"	f	typeref:typename:void *
+datiter_skip	./src/data/dat.c	/^datiter_skip(DatIter *p_iter, unsigned i_num) {$/;"	f	typeref:typename:void
+function_delete	./src/core/function.c	/^function_delete(Function *p_function) {$/;"	f	typeref:typename:void
+function_is_buildin	./src/core/functions.c	/^function_is_buildin(Token *p_token_ident) {$/;"	f	typeref:typename:_Bool
+function_is_self_defined	./src/core/functions.c	/^function_is_self_defined(Interpret *p_interpret) {$/;"	f	typeref:typename:_Bool
+function_new	./src/core/function.c	/^function_new() {$/;"	f	typeref:typename:Function *
+function_process	./src/core/functions.c	/^function_process(Interpret *p_interpret, Token *p_token_op,$/;"	f	typeref:typename:void
+function_process_buildin	./src/core/functions.c	/^function_process_buildin(Interpret *p_interpret, Token *p_token_ident,$/;"	f	typeref:typename:void
+function_process_self_defined	./src/core/functions.c	/^function_process_self_defined(Interpret *p_interpret, Token *p_token_ident) {$/;"	f	typeref:typename:void
+functions_delete	./src/core/functions.c	/^functions_delete(Functions *p_functions) {$/;"	f	typeref:typename:void
+functions_init	./src/core/functions.c	/^functions_init(Functions *p_functions) {$/;"	f	typeref:typename:void
+functions_new	./src/core/functions.c	/^functions_new() {$/;"	f	typeref:typename:Functions *
+fype_delete	./src/fype.c	/^fype_delete(Fype *p_fype) {$/;"	f	typeref:typename:void
+fype_new	./src/fype.c	/^fype_new() {$/;"	f	typeref:typename:Fype *
+fype_run	./src/fype.c	/^fype_run(int i_argc, char **pc_argv) {$/;"	f	typeref:typename:int
+garbage_add	./src/core/garbage.c	/^garbage_add(void *p, GarbageType type) {$/;"	f	typeref:typename:void
+garbage_add2	./src/core/garbage.c	/^garbage_add2(void *p,$/;"	f	typeref:typename:void
+garbage_add3	./src/core/garbage.c	/^garbage_add3(void *p,$/;"	f	typeref:typename:void
+garbage_add_token	./src/core/garbage.c	/^garbage_add_token(Token *p_token) {$/;"	f	typeref:typename:void
+garbage_collect	./src/core/garbage.c	/^garbage_collect() {$/;"	f	typeref:typename:int
+garbage_destroy	./src/core/garbage.c	/^garbage_destroy() {$/;"	f	typeref:typename:void
+garbage_init	./src/core/garbage.c	/^garbage_init() {$/;"	f	typeref:typename:void
+get_tt	./src/core/token.c	/^get_tt(char *c_token) {$/;"	f	typeref:typename:TokenType
+hash_addrisfree	./src/data/hash.c	/^hash_addrisfree(Hash *p_hash, int i_addr) {$/;"	f	typeref:typename:RETCODE
+hash_addrisocc	./src/data/hash.c	/^hash_addrisocc(Hash *p_hash, int i_addr, char *c_key) {$/;"	f	typeref:typename:RETCODE
+hash_delete	./src/data/hash.c	/^hash_delete(Hash *p_hash) {$/;"	f	typeref:typename:void
+hash_get	./src/data/hash.c	/^hash_get(Hash *p_hash, char *c_key) {$/;"	f	typeref:typename:void *
+hash_get_ht	./src/data/hash.c	/^hash_get_ht(Hash *p_hash, char *c_key, TYPE *p_type) {$/;"	f	typeref:typename:void *
+hash_get_ht_addr	./src/data/hash.c	/^hash_get_ht_addr(Hash *p_hash, char *c_key, TYPE *p_type, int *p_addr) {$/;"	f	typeref:typename:void *
+hash_getaddr	./src/data/hash.c	/^hash_getaddr(Hash *p_hash, char *c_key, HASH_OP OP) {$/;"	f	typeref:typename:int
+hash_insert	./src/data/hash.c	/^hash_insert(Hash *p_hash, char *c_key, void *p_val) {$/;"	f	typeref:typename:RETCODE
+hash_insert_ht	./src/data/hash.c	/^hash_insert_ht(Hash *p_hash, char *c_key, void *p_val, TYPE type) {$/;"	f	typeref:typename:RETCODE
+hash_iterate	./src/data/hash.c	/^hash_iterate(Hash *p_hash, void (*func)(void *)) {$/;"	f	typeref:typename:void
+hash_iterate_key	./src/data/hash.c	/^hash_iterate_key(Hash *p_hash, void (*func)(void *, char *)) {$/;"	f	typeref:typename:void
+hash_new	./src/data/hash.c	/^hash_new(unsigned i_size) {$/;"	f	typeref:typename:Hash *
+hash_nextaddr	./src/data/hash.c	/^hash_nextaddr(Hash *p_hash, int i_max_tries, char *c_key, int i_addr,$/;"	f	typeref:typename:int
+hash_print	./src/data/hash.c	/^hash_print(Hash *p_hash) {$/;"	f	typeref:typename:void
+hash_print_addrval	./src/data/hash.c	/^hash_print_addrval(Hash *p_hash, int i_addr) {$/;"	f	typeref:typename:void
+hash_remove	./src/data/hash.c	/^hash_remove(Hash *p_hash, char *c_key) {$/;"	f	typeref:typename:void *
+hash_size	./src/data/hash.c	/^hash_size(Hash *p_hash, int i_size) {$/;"	f	typeref:typename:RETCODE
+interpret_delete	./src/core/interpret.c	/^interpret_delete(Interpret *p_interpret) {$/;"	f	typeref:typename:void
+interpret_new	./src/core/interpret.c	/^interpret_new(List *p_list_token, Hash *p_hash_syms) {$/;"	f	typeref:typename:Interpret *
+interpret_process	./src/core/interpret.c	/^interpret_process(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+interpret_run	./src/core/interpret.c	/^interpret_run(Fype *p_fype) {$/;"	f	typeref:typename:void
+interpret_subprocess	./src/core/interpret.c	/^interpret_subprocess(Interpret *p_interpret, List *p_list_token) {$/;"	f	typeref:typename:int
+list_add_back	./src/data/list.c	/^list_add_back(List *p_list, void *p_val) {$/;"	f	typeref:typename:void
+list_add_front	./src/data/list.c	/^list_add_front(List *p_list, void *p_val) {$/;"	f	typeref:typename:void
+list_clear	./src/data/list.c	/^list_clear(List *p_list) {$/;"	f	typeref:typename:void
+list_clear_and_free_vals	./src/data/list.c	/^list_clear_and_free_vals(List *p_list) {$/;"	f	typeref:typename:void
+list_concat_back	./src/data/list.c	/^list_concat_back(List *p_list1, List *p_list2) {$/;"	f	typeref:typename:void
+list_concat_front	./src/data/list.c	/^list_concat_front(List *p_list1, List *p_list2) {$/;"	f	typeref:typename:void
+list_copy	./src/data/list.c	/^list_copy(List *p_list) {$/;"	f	typeref:typename:List *
+list_copy2	./src/data/list.c	/^list_copy2(List *p_list, void* (*func)(void *)) {$/;"	f	typeref:typename:List *
+list_delete	./src/data/list.c	/^list_delete(List *p_list) {$/;"	f	typeref:typename:void
+list_delete_and_free_vals	./src/data/list.c	/^list_delete_and_free_vals(List *p_list) {$/;"	f	typeref:typename:void
+list_delete_cb	./src/data/list.c	/^list_delete_cb(void *p_list) {$/;"	f	typeref:typename:void
+list_empty	./src/data/list.c	/^list_empty(List *p_list) {$/;"	f	typeref:typename:_Bool
+list_iterate	./src/data/list.c	/^list_iterate(List *p_list, void (*func)(void *)) {$/;"	f	typeref:typename:void
+list_iterate2	./src/data/list.c	/^list_iterate2(List *p_list, void (*func)(void *, void *), void *p_void) {$/;"	f	typeref:typename:void
+list_iterate2_ptr	./src/data/list.c	/^list_iterate2_ptr(List *p_list, void (*func)(void *, void *), void *p_void) {$/;"	f	typeref:typename:void
+list_iterate3	./src/data/list.c	/^list_iterate3(List *p_list,$/;"	f	typeref:typename:void
+list_iterate3_ptr	./src/data/list.c	/^list_iterate3_ptr(List *p_list,$/;"	f	typeref:typename:void
+list_new	./src/data/list.c	/^list_new() {$/;"	f	typeref:typename:List *
+list_remove_back	./src/data/list.c	/^list_remove_back(List *p_list) {$/;"	f	typeref:typename:void *
+list_remove_elem	./src/data/list.c	/^list_remove_elem(List *p_list, ListElem *p_elem_remove) {$/;"	f	typeref:typename:void
+list_remove_front	./src/data/list.c	/^list_remove_front(List *p_list) {$/;"	f	typeref:typename:void *
+list_size	./src/data/list.c	/^list_size(List *p_list) {$/;"	f	typeref:typename:unsigned
+listelem_new	./src/data/list.c	/^listelem_new() {$/;"	f	typeref:typename:ListElem *
+listiterator_current	./src/data/list.c	/^listiterator_current(ListIterator *p_iter) {$/;"	f	typeref:typename:void *
+listiterator_delete	./src/data/list.c	/^listiterator_delete(ListIterator *p_iter) {$/;"	f	typeref:typename:void
+listiterator_end	./src/data/list.c	/^listiterator_end(ListIterator *p_iter) {$/;"	f	typeref:typename:void *
+listiterator_get_state	./src/data/list.c	/^listiterator_get_state(ListIterator *p_iter) {$/;"	f	typeref:typename:ListIteratorState *
+listiterator_has_next	./src/data/list.c	/^listiterator_has_next(ListIterator *p_iter) {$/;"	f	typeref:typename:_Bool
+listiterator_new	./src/data/list.c	/^listiterator_new(List *p_list) {$/;"	f	typeref:typename:ListIterator *
+listiterator_new_reverse	./src/data/list.c	/^listiterator_new_reverse(List *p_list) {$/;"	f	typeref:typename:ListIterator *
+listiterator_next	./src/data/list.c	/^listiterator_next(ListIterator *p_iter) {$/;"	f	typeref:typename:void *
+listiterator_next_elem	./src/data/list.c	/^listiterator_next_elem(ListIterator *p_iter) {$/;"	f	typeref:typename:ListElem *
+listiterator_prev	./src/data/list.c	/^listiterator_prev(ListIterator *p_iter) {$/;"	f	typeref:typename:void *
+listiterator_set_state	./src/data/list.c	/^listiterator_set_state(ListIterator *p_iter, ListIteratorState *p_state) {$/;"	f	typeref:typename:void
+listiteratorstate_delete	./src/data/list.c	/^listiteratorstate_delete(ListIteratorState *p_state) {$/;"	f	typeref:typename:void
+main	./src/main.c	/^main(int i_argc, char **pc_argv) {$/;"	f	typeref:typename:int
+map_clear	./src/data/map.c	/^map_clear(Map *p_map) {$/;"	f	typeref:typename:void
+map_clear_and_free_vals	./src/data/map.c	/^map_clear_and_free_vals(Map *p_map) {$/;"	f	typeref:typename:void
+map_delete	./src/data/map.c	/^map_delete(Map *p_map) {$/;"	f	typeref:typename:void
+map_delete_and_free_vals	./src/data/map.c	/^map_delete_and_free_vals(Map *p_map) {$/;"	f	typeref:typename:void
+map_empty	./src/data/map.c	/^map_empty(Map *p_map) {$/;"	f	typeref:typename:_Bool
+map_exists	./src/data/map.c	/^map_exists(Map *p_map, char *c_key) {$/;"	f	typeref:typename:_Bool
+map_exists2	./src/data/map.c	/^map_exists2(Map *p_map, char *c_key1, char *c_key2) {$/;"	f	typeref:typename:_Bool
+map_full	./src/data/map.c	/^map_full(Map *p_map) {$/;"	f	typeref:typename:_Bool
+map_get	./src/data/map.c	/^map_get(Map *p_map, char *c_key) {$/;"	f	typeref:typename:void *
+map_get2	./src/data/map.c	/^map_get2(Map *p_map, char *c_key1, char *c_key2) {$/;"	f	typeref:typename:void *
+map_get_addr	./src/data/map.c	/^map_get_addr(Map *p_map, char *c_key) {$/;"	f	typeref:typename:int
+map_get_key	./src/data/map.c	/^map_get_key(Map *p_map, void *p_val) {$/;"	f	typeref:typename:char *
+map_insert	./src/data/map.c	/^map_insert(Map *p_map, char *c_key, void *p_val) {$/;"	f	typeref:typename:_Bool
+map_insert2	./src/data/map.c	/^map_insert2(Map *p_map, char *c_key1, char *c_key2, void *p_val) {$/;"	f	typeref:typename:_Bool
+map_insert_if_not_exists	./src/data/map.c	/^map_insert_if_not_exists(Map *p_map, char *c_key, void *p_val) {$/;"	f	typeref:typename:_Bool
+map_iterate	./src/data/map.c	/^map_iterate(Map *p_map, void (*func) (void *)) {$/;"	f	typeref:typename:void
+map_iterate2	./src/data/map.c	/^map_iterate2(Map *p_map, void (*func) (void *, void *), void *p_void) {$/;"	f	typeref:typename:void
+map_iterate2_keys	./src/data/map.c	/^map_iterate2_keys(Map *p_map,$/;"	f	typeref:typename:void
+map_iterate3	./src/data/map.c	/^map_iterate3(Map *p_map,$/;"	f	typeref:typename:void
+map_iterate3_keys	./src/data/map.c	/^map_iterate3_keys(Map *p_map,$/;"	f	typeref:typename:void
+map_iterate_keys	./src/data/map.c	/^map_iterate_keys(Map *p_map, void (*func) (void *, char *)) {$/;"	f	typeref:typename:void
+map_new	./src/data/map.c	/^map_new(int i_max_size) {$/;"	f	typeref:typename:Map *
+map_new_named	./src/data/map.c	/^map_new_named(int i_max_size, char *c_name) {$/;"	f	typeref:typename:Map *
+map_next_free_addr	./src/data/map.c	/^map_next_free_addr(Map *p_map) {$/;"	f	typeref:typename:int
+map_print	./src/data/map.c	/^map_print(Map *p_map) {$/;"	f	typeref:typename:void
+map_remove	./src/data/map.c	/^map_remove(Map *p_map, char *c_key) {$/;"	f	typeref:typename:void
+p_2free	./src/core/garbage.c	/^   void *p_2free;$/;"	m	struct:__anoneaa3b3cb0108	typeref:typename:void *	file:
+p_func	./src/core/garbage.c	/^   void (*p_func)(void*);$/;"	m	struct:__anoneaa3b3cb0108	typeref:typename:void (*)(void *)	file:
+p_print	./src/core/garbage.c	/^   void (*p_print)(void*);$/;"	m	struct:__anoneaa3b3cb0108	typeref:typename:void (*)(void *)	file:
+p_ref_count	./src/core/garbage.c	/^   int *p_ref_count;$/;"	m	struct:__anoneaa3b3cb0108	typeref:typename:int *	file:
+queue_clear	./src/data/queue.c	/^queue_clear(Queue *p_queue) {$/;"	f	typeref:typename:void
+queue_delete	./src/data/queue.c	/^queue_delete(Queue *p_queue) {$/;"	f	typeref:typename:void
+queue_empty	./src/data/queue.c	/^queue_empty(Queue *p_queue) {$/;"	f	typeref:typename:_Bool
+queue_iterate	./src/data/queue.c	/^queue_iterate(Queue *p_queue, void (*func)(void *)) {$/;"	f	typeref:typename:void
+queue_iterate_t	./src/data/queue.c	/^queue_iterate_t(Queue *p_queue, void (*func)(void *, TYPE)) {$/;"	f	typeref:typename:void
+queue_iterate_tl	./src/data/queue.c	/^queue_iterate_tl(Queue *p_queue, void (*func)(void *, TYPE, _Bool)) {$/;"	f	typeref:typename:void
+queue_new	./src/data/queue.c	/^queue_new() {$/;"	f	typeref:typename:Queue *
+queue_pop	./src/data/queue.c	/^queue_pop(Queue *p_queue) {$/;"	f	typeref:typename:void *
+queue_pop_t	./src/data/queue.c	/^queue_pop_t(Queue *p_queue, TYPE *p_type) {$/;"	f	typeref:typename:void *
+queue_push	./src/data/queue.c	/^queue_push(Queue *p_queue, void *p_val) {$/;"	f	typeref:typename:void
+queue_push_t	./src/data/queue.c	/^queue_push_t(Queue *p_queue, void *p_val, TYPE type) {$/;"	f	typeref:typename:void
+queue_size	./src/data/queue.c	/^queue_size(Queue *p_queue) {$/;"	f	typeref:typename:unsigned
+queueelem_new	./src/data/queue.c	/^queueelem_new() {$/;"	f	typeref:typename:QueueElem *
+queueelem_new_t	./src/data/queue.c	/^queueelem_new_t(TYPE type) {$/;"	f	typeref:typename:QueueElem *
+queueiter_delete	./src/data/queue.c	/^queueiter_delete(QueueIter *p_iter) {$/;"	f	typeref:typename:void
+queueiter_left	./src/data/queue.c	/^queueiter_left(QueueIter *p_iter) {$/;"	f	typeref:typename:unsigned
+queueiter_new	./src/data/queue.c	/^queueiter_new(Queue *p_queue) {$/;"	f	typeref:typename:QueueIter *
+queueiter_next	./src/data/queue.c	/^queueiter_next(QueueIter *p_iter) {$/;"	f	typeref:typename:void *
+queueiter_next_t	./src/data/queue.c	/^queueiter_next_t(QueueIter *p_iter, TYPE *p_type) {$/;"	f	typeref:typename:void *
+queueiter_queue	./src/data/queue.c	/^queueiter_queue(QueueIter *p_iter) {$/;"	f	typeref:typename:Queue *
+reference_delete	./src/core/reference.c	/^reference_delete(Reference *p_reference) {$/;"	f	typeref:typename:void
+reference_delete_cb	./src/core/reference.c	/^reference_delete_cb(void *p_void) {$/;"	f	typeref:typename:void
+reference_new	./src/core/reference.c	/^reference_new(Symbol *p_symbol) {$/;"	f	typeref:typename:Reference *
+scanner_add_token	./src/core/scanner.c	/^scanner_add_token(Scanner *p_scanner, char **cc_token, int *p_token_len,$/;"	f	typeref:typename:void
+scanner_cleanup_list_token_cb	./src/core/scanner.c	/^scanner_cleanup_list_token_cb(void *p_void) {$/;"	f	typeref:typename:void
+scanner_delete	./src/core/scanner.c	/^scanner_delete(Scanner *p_scanner) {$/;"	f	typeref:typename:void
+scanner_get_tt_cur	./src/core/scanner.c	/^scanner_get_tt_cur(char *c_token) {$/;"	f	typeref:typename:TokenType
+scanner_new	./src/core/scanner.c	/^scanner_new(List *p_list_token, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:Scanner *
+scanner_post_task	./src/core/scanner.c	/^scanner_post_task(Scanner *p_scanner) {$/;"	f	typeref:typename:void
+scanner_run	./src/core/scanner.c	/^scanner_run(Fype *p_fype) {$/;"	f	typeref:typename:void
+scope_delete	./src/core/scope.c	/^scope_delete(Scope *p_scope) {$/;"	f	typeref:typename:void
+scope_down	./src/core/scope.c	/^scope_down(Scope *p_scope) {$/;"	f	typeref:typename:void
+scope_exists	./src/core/scope.c	/^scope_exists(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:_Bool
+scope_get	./src/core/scope.c	/^scope_get(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:Symbol *
+scope_new	./src/core/scope.c	/^scope_new(Hash *p_hash_syms) {$/;"	f	typeref:typename:Scope *
+scope_newset	./src/core/scope.c	/^scope_newset(Scope *p_scope, char *c_key, Symbol *p_symbol) {$/;"	f	typeref:typename:_Bool
+scope_print	./src/core/scope.c	/^scope_print(Scope *p_scope) {$/;"	f	typeref:typename:void
+scope_remove	./src/core/scope.c	/^scope_remove(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:Symbol *
+scope_reset	./src/core/scope.c	/^scope_reset(Scope *p_scope, char *c_key, Symbol *p_symbol) {$/;"	f	typeref:typename:_Bool
+scope_up	./src/core/scope.c	/^scope_up(Scope *p_scope) {$/;"	f	typeref:typename:void
+stack_clear	./src/data/stack.c	/^stack_clear(Stack *p_stack) {$/;"	f	typeref:typename:void
+stack_concat	./src/data/stack.c	/^stack_concat(Stack *p_stack, Stack *p_stack_concat) {$/;"	f	typeref:typename:void
+stack_delete	./src/data/stack.c	/^stack_delete(Stack *p_stack) {$/;"	f	typeref:typename:void
+stack_delete_and_free	./src/data/stack.c	/^stack_delete_and_free(Stack *p_stack) {$/;"	f	typeref:typename:void
+stack_empty	./src/data/stack.c	/^stack_empty(Stack *p_stack) {$/;"	f	typeref:typename:_Bool
+stack_iterate	./src/data/stack.c	/^stack_iterate(Stack *p_stack, void (*func)(void *p_void)) {$/;"	f	typeref:typename:void
+stack_iterate2	./src/data/stack.c	/^stack_iterate2(Stack *p_stack, void (*func)(void *p_void, void *p_void2),$/;"	f	typeref:typename:void
+stack_iterate_level	./src/data/stack.c	/^stack_iterate_level(Stack *p_stack, void (*func)(void *p_void,$/;"	f	typeref:typename:void
+stack_merge	./src/data/stack.c	/^stack_merge(Stack *p_stack, Stack *p_stack_merge) {$/;"	f	typeref:typename:void
+stack_new	./src/data/stack.c	/^stack_new() {$/;"	f	typeref:typename:Stack *
+stack_pop	./src/data/stack.c	/^stack_pop(Stack *p_stack) {$/;"	f	typeref:typename:void *
+stack_push	./src/data/stack.c	/^stack_push(Stack *p_stack, void *p_val) {$/;"	f	typeref:typename:void
+stack_size	./src/data/stack.c	/^stack_size(Stack *p_stack) {$/;"	f	typeref:typename:unsigned
+stack_top	./src/data/stack.c	/^stack_top(Stack *p_stack) {$/;"	f	typeref:typename:void *
+stackelem_new	./src/data/stack.c	/^stackelem_new() {$/;"	f	typeref:typename:StackElem *
+stackiterator_delete	./src/data/stack.c	/^stackiterator_delete(StackIterator *p_iter) {$/;"	f	typeref:typename:void
+stackiterator_has_next	./src/data/stack.c	/^stackiterator_has_next(StackIterator *p_iter) {$/;"	f	typeref:typename:_Bool
+stackiterator_new	./src/data/stack.c	/^stackiterator_new(Stack *p_stack) {$/;"	f	typeref:typename:StackIterator *
+stackiterator_next	./src/data/stack.c	/^stackiterator_next(StackIterator *p_iter) {$/;"	f	typeref:typename:void *
+stackiterator_remove_prev	./src/data/stack.c	/^stackiterator_remove_prev(StackIterator *p_iter) {$/;"	f	typeref:typename:_Bool
+sym_get_name	./src/core/symbol.c	/^sym_get_name(SymbolType sym) {$/;"	f	typeref:typename:char *
+symbol_cleanup_hash_syms_cb	./src/core/symbol.c	/^symbol_cleanup_hash_syms_cb(void *p_void) {$/;"	f	typeref:typename:void
+symbol_delete	./src/core/symbol.c	/^symbol_delete(Symbol *p_symbol) {$/;"	f	typeref:typename:void
+symbol_new	./src/core/symbol.c	/^symbol_new(SymbolType sym, void *p_val) {$/;"	f	typeref:typename:Symbol *
+symbol_print	./src/core/symbol.c	/^symbol_print(Symbol *p_symbol, char *c_key) {$/;"	f	typeref:typename:void
+symbol_print_cb	./src/core/symbol.c	/^symbol_print_cb(void *p_void, char *c_key) {$/;"	f	typeref:typename:void
+token_copy_cb	./src/core/token.c	/^token_copy_cb(void *p_void) {$/;"	f	typeref:typename:void *
+token_copy_vals	./src/core/token.c	/^void token_copy_vals(Token *p_token_to, Token *p_token_from) {$/;"	f	typeref:typename:void
+token_delete	./src/core/token.c	/^token_delete(Token *p_token) {$/;"	f	typeref:typename:void
+token_delete_cb	./src/core/token.c	/^token_delete_cb(void *p_void) {$/;"	f	typeref:typename:void
+token_new	./src/core/token.c	/^token_new(char *c_val, TokenType tt_cur, int i_line_nr,$/;"	f	typeref:typename:Token *
+token_new_	./src/core/token.c	/^token_new_(char *c_val, TokenType tt_cur, char *c_filename) {$/;"	f	typeref:typename:Token *
+token_new_array	./src/core/token.c	/^token_new_array(int i_size) {$/;"	f	typeref:typename:Token *
+token_new_copy	./src/core/token.c	/^token_new_copy(Token *p_token) {$/;"	f	typeref:typename:Token *
+token_new_double	./src/core/token.c	/^token_new_double(double d_val) {$/;"	f	typeref:typename:Token *
+token_new_dummy	./src/core/token.c	/^token_new_dummy() {$/;"	f	typeref:typename:Token *
+token_new_integer	./src/core/token.c	/^token_new_integer(int i_val) {$/;"	f	typeref:typename:Token *
+token_new_string	./src/core/token.c	/^token_new_string(char *c_val) {$/;"	f	typeref:typename:Token *
+token_print	./src/core/token.c	/^token_print(Token *p_token) {$/;"	f	typeref:typename:void
+token_print_cb	./src/core/token.c	/^token_print_cb(void *p_void) {$/;"	f	typeref:typename:void
+token_print_val	./src/core/token.c	/^token_print_val(Token *p_token) {$/;"	f	typeref:typename:void
+token_ref_down_cb	./src/core/token.c	/^token_ref_down_cb(void *p_void) {$/;"	f	typeref:typename:void
+tree_delete	./src/data/tree.c	/^tree_delete(Tree *p_tree) {$/;"	f	typeref:typename:void
+tree_new	./src/data/tree.c	/^tree_new() {$/;"	f	typeref:typename:Tree *
+tree_print	./src/data/tree.c	/^tree_print(Tree *p_tree) {$/;"	f	typeref:typename:void
+treeiterator_delete	./src/data/tree.c	/^treeiterator_delete(TreeIterator *p_iter) {$/;"	f	typeref:typename:void
+treeiterator_has_next	./src/data/tree.c	/^treeiterator_has_next(TreeIterator *p_iter) {$/;"	f	typeref:typename:_Bool
+treeiterator_new	./src/data/tree.c	/^treeiterator_new(Tree *p_tree) {$/;"	f	typeref:typename:TreeIterator *
+treeiterator_next	./src/data/tree.c	/^treeiterator_next(TreeIterator *p_iter) {$/;"	f	typeref:typename:TreeNode *
+treeiteratorstate_delete	./src/data/tree.c	/^treeiteratorstate_delete(TreeIteratorState *p_state) {$/;"	f	typeref:typename:void
+treeiteratorstate_new	./src/data/tree.c	/^treeiteratorstate_new(TreeNode *ptn) {$/;"	f	typeref:typename:TreeIteratorState *
+treenode_delete	./src/data/tree.c	/^treenode_delete(TreeNode *p_treenode) {$/;"	f	typeref:typename:void
+treenode_insert_left	./src/data/tree.c	/^treenode_insert_left(TreeNode *p_treenode, TreeNode *p_treenode2) {$/;"	f	typeref:typename:void
+treenode_insert_right	./src/data/tree.c	/^treenode_insert_right(TreeNode *p_treenode, TreeNode *p_treenode2) {$/;"	f	typeref:typename:void
+treenode_new	./src/data/tree.c	/^treenode_new(void *p_val) {$/;"	f	typeref:typename:TreeNode *
+treenode_new2	./src/data/tree.c	/^treenode_new2(void *p_val, void *p_val2) {$/;"	f	typeref:typename:TreeNode *
+tt_get_name	./src/core/token.c	/^tt_get_name(TokenType tt_cur) {$/;"	f	typeref:typename:char *
+tupel_delete	./src/data/tupel.c	/^tupel_delete(Tupel *p_tupel) {$/;"	f	typeref:typename:void
+tupel_new	./src/data/tupel.c	/^tupel_new() {$/;"	f	typeref:typename:Tupel *
+type	./src/core/garbage.c	/^   GarbageType type;$/;"	m	struct:__anoneaa3b3cb0108	typeref:typename:GarbageType	file:

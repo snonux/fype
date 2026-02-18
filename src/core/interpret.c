@@ -168,7 +168,9 @@ int
 _program(Interpret *p_interpret) {
    _CHECK TRACK
 
-   while (_statement(p_interpret) == 1)
+   /* Stop executing statements as soon as break/next is active so the
+    * control flag propagates cleanly up to the enclosing loop. */
+   while (_statement(p_interpret) == 1 && p_interpret->ct == CONTROL_NONE)
       garbage_collect();
 
    return (1);
@@ -496,6 +498,18 @@ _control(Interpret *p_interpret) {
    Token *p_token = p_interpret->p_token;
 
    switch (p_interpret->tt) {
+   /* break; — set the break flag; the statement loop in _program() will
+    * stop and the flag propagates up to the enclosing while/until. */
+   case TT_BREAK:
+      p_interpret->ct = CONTROL_BREAK;
+      _NEXT
+      return (1);
+   /* next; — set the next flag to skip the rest of the loop body and
+    * let the loop re-evaluate its condition on the next iteration. */
+   case TT_NEXT:
+      p_interpret->ct = CONTROL_NEXT;
+      _NEXT
+      return (1);
    case TT_IF:
    case TT_IFNOT:
    {
@@ -584,18 +598,16 @@ _control(Interpret *p_interpret) {
                }
             }
 
-            /*
-            switch (p_interpret->ct) {
-                case CONTROL_BREAK:
-              	  p_interpret->ct = CONTROL_NONE;
-              	  b_flag = false;
-              	  break;
-                case CONTROL_NEXT:
-              	  p_interpret->ct = CONTROL_NONE;
-              	  break;
-              	  NO_DEFAULT;
+            /* Act on any break/next flag set during loop body execution.
+             * break clears the flag and stops iteration; next clears it
+             * and lets the loop re-evaluate the condition naturally. */
+            if (p_interpret->ct == CONTROL_BREAK) {
+               p_interpret->ct = CONTROL_NONE;
+               b_flag = false;
+            } else if (p_interpret->ct == CONTROL_NEXT) {
+               p_interpret->ct = CONTROL_NONE;
+               /* b_flag stays true; condition re-evaluated next iteration */
             }
-            */
 
          } else {
             _INTERPRET_ERROR("Expected expression after control keyword",

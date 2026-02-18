@@ -1,6 +1,6 @@
 make[1]: Entering directory '/home/paul/git/fype'
 ===> Num of C source files		: 46
-===> Num of C source lines		:   8225 
-===> Num of Fype source examples	: 14
-===> Num of Fype source lines		:  362 
+===> Num of C source lines		:   8237 
+===> Num of Fype source examples	: 15
+===> Num of Fype source lines		:  387 
 make[1]: Leaving directory '/home/paul/git/fype'

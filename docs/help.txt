@@ -1,4 +1,4 @@
-Fype Superalpha Build 9669
+Fype Superalpha Build 9671
 (c) Paul C. Buetow (2005 - 2008) <fype@dev.buetow.org>
 	-e	Executes given code string (see synopses)
 	-h	Prints this help

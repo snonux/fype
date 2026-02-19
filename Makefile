@@ -6,7 +6,8 @@ SRCS=$(shell find ./src -name '*.c')
 OBJS=$(SRCS:.c=.o)
 CC?=cc
 DEBUG=-g3 -ggdb3
-CFLAGS+=-c -Wall -std=c99 -pedantic $(DEBUG)
+# Enable POSIX extensions (e.g. strdup) before any system headers are seen
+CFLAGS+=-c -Wall -std=c99 -pedantic -D_POSIX_C_SOURCE=200809L $(DEBUG)
 LDADD+=
 HEADER?=docs/header.txt
 # Detect the OS name for updating build.h

@@ -160,6 +160,8 @@ datiter_new	./src/data/dat.c	/^datiter_new(Dat *p_dat) {$/;"	f	typeref:typename:
 datiter_next	./src/data/dat.c	/^datiter_next(DatIter *p_iter) {$/;"	f	typeref:typename:void *
 datiter_next_t	./src/data/dat.c	/^datiter_next_t(DatIter *p_iter, TYPE *p_type) {$/;"	f	typeref:typename:void *
 datiter_skip	./src/data/dat.c	/^datiter_skip(DatIter *p_iter, unsigned i_num) {$/;"	f	typeref:typename:void
+funcdef_delete	./src/core/symbol.c	/^funcdef_delete(FuncDef *p_funcdef) {$/;"	f	typeref:typename:void
+funcdef_new	./src/core/symbol.c	/^funcdef_new(List *p_body, List *p_params, int i_nparams) {$/;"	f	typeref:typename:FuncDef *
 function_delete	./src/core/function.c	/^function_delete(Function *p_function) {$/;"	f	typeref:typename:void
 function_is_buildin	./src/core/functions.c	/^function_is_buildin(Token *p_token_ident) {$/;"	f	typeref:typename:_Bool
 function_is_self_defined	./src/core/functions.c	/^function_is_self_defined(Interpret *p_interpret) {$/;"	f	typeref:typename:_Bool

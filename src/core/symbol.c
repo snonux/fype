@@ -38,6 +38,26 @@
 #include "../data/list.h"
 #include "token.h"
 
+FuncDef*
+funcdef_new(List *p_body, List *p_params, int i_nparams) {
+   FuncDef *p_fd = malloc(sizeof(FuncDef));
+   p_fd->p_body    = p_body;
+   p_fd->p_params  = p_params;
+   p_fd->i_nparams = i_nparams;
+   return (p_fd);
+}
+
+void
+funcdef_delete(FuncDef *p_funcdef) {
+   /* list_delete only frees list/node structs, not the token pointers
+    * inside p_body — those tokens are GC-managed by the scanner. */
+   list_delete(p_funcdef->p_body);
+   /* Each param name was strdup'd at declaration time; free each one. */
+   list_iterate(p_funcdef->p_params, free);
+   list_delete(p_funcdef->p_params);
+   free(p_funcdef);
+}
+
 Symbol*
 symbol_new(SymbolType sym, void *p_val) {
    Symbol *p_symbol = malloc(sizeof(Symbol));
@@ -61,6 +81,12 @@ symbol_delete(Symbol *p_symbol) {
       case SYM_ARRAY:
          symbol_delete(symbol_get_val(p_symbol));
          break;
+      case SYM_FUNCTION:
+      {
+         FuncDef *p_funcdef = (FuncDef*) symbol_get_val(p_symbol);
+         funcdef_delete(p_funcdef);
+      }
+      break;
          NO_DEFAULT;
       }
       free(p_symbol);

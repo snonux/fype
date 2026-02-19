@@ -414,18 +414,42 @@ _func_decl(Interpret *p_interpret) {
          _INTERPRET_ERROR("Symbol already defined", p_token_ident);
       }
 
-      List *p_list_proc = list_new();
+      List *p_list_params = list_new();
+      int i_nparams = 0;
 
-      if (_block_get(p_interpret, p_list_proc)) {
+      /* Optional comma-separated parameter list: func name(p1, p2) { body }
+       * Without parens, zero params — old-style syntax remains valid. */
+      if (p_interpret->tt == TT_PARANT_L) {
+         _NEXT   /* past '(' */
+         while (p_interpret->tt != TT_PARANT_R
+                && p_interpret->tt != TT_NONE) {
+            if (p_interpret->tt != TT_IDENT)
+               _INTERPRET_ERROR("Expected parameter name",
+                                p_interpret->p_token);
+            list_add_back(p_list_params,
+                          strdup(token_get_val(p_interpret->p_token)));
+            ++i_nparams;
+            _NEXT
+            if (p_interpret->tt == TT_COMMA) _NEXT   /* skip comma */
+         }
+         _NEXT   /* past ')' */
+      }
 
-         Symbol *p_symbol = symbol_new(SYM_FUNCTION, p_list_proc);
+      List *p_list_body = list_new();
+
+      if (_block_get(p_interpret, p_list_body)) {
+         FuncDef *p_funcdef = funcdef_new(p_list_body, p_list_params,
+                                          i_nparams);
+         Symbol *p_symbol = symbol_new(SYM_FUNCTION, p_funcdef);
          scope_newset(p_interpret->p_scope, token_get_val(p_token_ident),
                       p_symbol);
-
          return (1);
       }
 
-      list_delete(p_list_proc);
+      /* Block parse failed; clean up params and body */
+      list_delete(p_list_body);
+      list_iterate(p_list_params, free);
+      list_delete(p_list_params);
    }
 
    return (0);
@@ -498,6 +522,22 @@ _control(Interpret *p_interpret) {
    Token *p_token = p_interpret->p_token;
 
    switch (p_interpret->tt) {
+   /* ret;       — no return value (stack unchanged after clearing intermediates)
+    * ret expr;  — single return value pushed to stack
+    * ret a, b;  — multiple return values; all pushed left-to-right */
+   case TT_RET:
+      _NEXT   /* past 'ret' */
+      /* Clear any intermediate values accumulated during the function body
+       * so only the explicit return expressions remain on the stack. */
+      stack_clear(p_interpret->p_stack);
+      while (p_interpret->tt != TT_SEMICOLON
+             && p_interpret->tt != TT_NONE) {
+         _expression_(p_interpret);
+         if (p_interpret->tt == TT_COMMA)
+            _NEXT   /* past ',' between multiple return values */
+      }
+      p_interpret->ct = CONTROL_RET;
+      return (1);
    /* break; — set the break flag; the statement loop in _program() will
     * stop and the flag propagates up to the enclosing while/until. */
    case TT_BREAK:
@@ -598,15 +638,24 @@ _control(Interpret *p_interpret) {
                }
             }
 
-            /* Act on any break/next flag set during loop body execution.
+            /* Act on any break/next/ret flag set during loop body execution.
              * break clears the flag and stops iteration; next clears it
-             * and lets the loop re-evaluate the condition naturally. */
+             * and lets the loop re-evaluate the condition naturally.
+             * ret does not clear the flag so it propagates to the caller;
+             * the return value is rescued from cond_stack to p_stack_backup
+             * before the cond_stack is deleted below. */
             if (p_interpret->ct == CONTROL_BREAK) {
                p_interpret->ct = CONTROL_NONE;
                b_flag = false;
             } else if (p_interpret->ct == CONTROL_NEXT) {
                p_interpret->ct = CONTROL_NONE;
                /* b_flag stays true; condition re-evaluated next iteration */
+            } else if (p_interpret->ct == CONTROL_RET) {
+               /* Rescue any return values from cond_stack into the outer
+                * stack before cond_stack is destroyed at the end of the
+                * do-while iteration. */
+               stack_merge(p_stack_backup, p_interpret->p_stack);
+               b_flag = false;
             }
 
          } else {
@@ -649,6 +698,10 @@ _control(Interpret *p_interpret) {
          } else if (p_interpret->ct == CONTROL_NEXT) {
             p_interpret->ct = CONTROL_NONE;
             /* skip the rest of the body; re-run from the top */
+         } else if (p_interpret->ct == CONTROL_RET) {
+            /* ret inside loop: propagate CONTROL_RET up to the enclosing
+             * function without clearing it; return values are on the stack. */
+            break;
          }
       }
 
@@ -693,7 +746,9 @@ _control(Interpret *p_interpret) {
          interpret_subprocess(p_interpret, p_list_block);
          scope_down(p_interpret->p_scope);
 
-         /* Handle break/next before re-evaluating the condition */
+         /* Handle break/next/ret before re-evaluating the condition.
+          * For ret: stop the loop without touching the return value on
+          * p_interpret->p_stack; skip condition eval via continue. */
          if (p_interpret->ct == CONTROL_BREAK) {
             p_interpret->ct = CONTROL_NONE;
             b_flag = false;
@@ -701,6 +756,11 @@ _control(Interpret *p_interpret) {
          } else if (p_interpret->ct == CONTROL_NEXT) {
             p_interpret->ct = CONTROL_NONE;
             /* fall through to condition check */
+         } else if (p_interpret->ct == CONTROL_RET) {
+            /* ret inside do-loop: propagate CONTROL_RET; skip condition
+             * re-eval to avoid corrupting the stack with cond results. */
+            b_flag = false;
+            continue;
          }
 
          /* Re-evaluate condition using a temp stack/iterator over
@@ -980,8 +1040,21 @@ _term(Interpret *p_interpret) {
             Stack *p_stack = p_interpret->p_stack;
             p_interpret->p_stack = stack_new();
 
-            _NEXT
-            if (_expression_(p_interpret));
+            _NEXT   /* advance past function name */
+            if (p_interpret->tt == TT_PARANT_L) {
+               /* Parenthesised call: func(arg1, arg2) — collect args */
+               _NEXT   /* past '(' */
+               while (p_interpret->tt != TT_PARANT_R
+                      && p_interpret->tt != TT_NONE) {
+                  _expression_(p_interpret);
+                  if (p_interpret->tt == TT_COMMA)
+                     _NEXT   /* past ',' between arguments */
+               }
+               _NEXT   /* past ')' */
+            } else {
+               /* Old-style call without parens (procedures; zero-arg funcs) */
+               if (_expression_(p_interpret));
+            }
 
             function_process_self_defined(p_interpret, p_token);
 
@@ -1158,13 +1231,18 @@ interpret_process(Interpret *p_interpret) {
 
 int
 interpret_subprocess(Interpret *p_interpret, List *p_list_token) {
-   Interpret *p_interpret_sub = interpret_new(p_list_token,
-                                NULL);
+   Interpret *p_interpret_sub = interpret_new(p_list_token, NULL);
 
    p_interpret_sub->p_scope = p_interpret->p_scope;
 
    int i_ret = interpret_process(p_interpret_sub);
    p_interpret->ct = p_interpret_sub->ct;
+
+   /* When a 'ret' fired, move return values from the sub's stack into
+    * the parent's stack so they survive subprocess teardown. The merge
+    * empties p_interpret_sub->p_stack, so interpret_delete is safe. */
+   if (p_interpret->ct == CONTROL_RET)
+      stack_merge(p_interpret->p_stack, p_interpret_sub->p_stack);
 
    interpret_delete(p_interpret_sub);
 

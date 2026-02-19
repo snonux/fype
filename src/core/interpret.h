@@ -50,6 +50,7 @@ typedef enum {
    CONTROL_NONE,
    CONTROL_NEXT,
    CONTROL_BREAK,
+   CONTROL_RET,   /* explicit return from a function */
 } ControlType;
 
 typedef struct {

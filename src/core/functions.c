@@ -971,9 +971,38 @@ function_process_self_defined(Interpret *p_interpret, Token *p_token_ident) {
    break;
    case SYM_FUNCTION:
    {
-      List *p_list_token = symbol_get_val(p_symbol);
+      FuncDef *p_funcdef = (FuncDef*) symbol_get_val(p_symbol);
       scope_up(p_interpret->p_scope);
-      interpret_subprocess(p_interpret, p_list_token);
+
+      /* Bind each named parameter to its argument value.
+       * Args were pushed left-to-right so the last arg is on top (LIFO).
+       * Reverse-fill a temp array so index 0 = first param = first arg. */
+      if (p_funcdef->i_nparams > 0) {
+         Token **pp_args = malloc(
+            sizeof(Token*) * p_funcdef->i_nparams);
+
+         for (int i = p_funcdef->i_nparams - 1; i >= 0; --i)
+            pp_args[i] = stack_pop(p_interpret->p_stack);
+
+         ListIterator *p_iter = listiterator_new(p_funcdef->p_params);
+
+         for (int i = 0; i < p_funcdef->i_nparams; ++i) {
+            char *c_name = (char*) listiterator_next(p_iter);
+            Symbol *p_sym = symbol_new(SYM_VARIABLE, pp_args[i]);
+            scope_newset(p_interpret->p_scope, c_name, p_sym);
+         }
+
+         listiterator_delete(p_iter);
+         free(pp_args);
+      }
+
+      interpret_subprocess(p_interpret, p_funcdef->p_body);
+
+      /* Consume CONTROL_RET here; return value(s) are already on the stack
+       * (merged by interpret_subprocess when CONTROL_RET was active). */
+      if (p_interpret->ct == CONTROL_RET)
+         p_interpret->ct = CONTROL_NONE;
+
       scope_down(p_interpret->p_scope);
    }
    NO_DEFAULT;

@@ -545,9 +545,9 @@ keyword in order to check if a procedure has been defined or not.</p>
 <p>
 </p>
 <h2><a name="functions">Functions</a></h2>
-<p>A function should be defined with the <strong>func</strong> keyword and deleted with the <strong>undef</strong> keyword. Function not yet return values (will be changed in future versions) and supports not yet parameter passing (will be changed in future versions). It's using local (lexical scoped) variables. If a certain variable does not exist It's using already defined variables (e.g. one scope above).</p>
+<p>A function should be defined with the <strong>fun</strong> keyword and deleted with the <strong>undef</strong> keyword. Function not yet return values (will be changed in future versions) and supports not yet parameter passing (will be changed in future versions). It's using local (lexical scoped) variables. If a certain variable does not exist It's using already defined variables (e.g. one scope above).</p>
 <pre>
-        func foo {
+        fun foo {
                 say 1 + a * 3 + b;
                 my c = 6;
         }</pre>
@@ -561,8 +561,8 @@ keyword in order to check if a procedure has been defined or not.</p>
 <h2><a name="nested_functions">Nested functions</a></h2>
 <p>Nested functions work the same way the nested procedures work, with the exception that nested functions will not be available any more after the function has been left!</p>
 <pre>
-        func foo {
-                func bar {
+        fun foo {
+                fun bar {
                         say &quot;Hello i am nested&quot;;
                 }</pre>
 <pre>

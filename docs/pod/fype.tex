@@ -518,10 +518,10 @@ keyword in order to check if a procedure has been defined or not.
 \subsection*{Functions\label{Functions}\index{Functions}}
 
 
-A function should be defined with the \textbf{func} keyword and deleted with the \textbf{undef} keyword. Function not yet return values (will be changed in future versions) and supports not yet parameter passing (will be changed in future versions). It's using local (lexical scoped) variables. If a certain variable does not exist It's using already defined variables (e.g. one scope above).
+A function should be defined with the \textbf{fun} keyword and deleted with the \textbf{undef} keyword. Function not yet return values (will be changed in future versions) and supports not yet parameter passing (will be changed in future versions). It's using local (lexical scoped) variables. If a certain variable does not exist It's using already defined variables (e.g. one scope above).
 
 \begin{verbatim}
-        func foo {
+        fun foo {
                 say 1 + a * 3 + b;
                 my c = 6;
         }
@@ -539,8 +539,8 @@ A function should be defined with the \textbf{func} keyword and deleted with the
 Nested functions work the same way the nested procedures work, with the exception that nested functions will not be available any more after the function has been left!
 
 \begin{verbatim}
-        func foo {
-                func bar {
+        fun foo {
+                fun bar {
                         say "Hello i am nested";
                 }
 \end{verbatim}

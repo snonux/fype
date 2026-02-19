@@ -391,14 +391,14 @@ SELF DEFINING PROCEDURES AND FUNCTIONS
             foo; # Here the procedure foo will redefine bar again!
 
   Functions
-    A function should be defined with the func keyword and deleted with the
+    A function should be defined with the fun keyword and deleted with the
     undef keyword. Function not yet return values (will be changed in future
     versions) and supports not yet parameter passing (will be changed in
     future versions). It's using local (lexical scoped) variables. If a
     certain variable does not exist It's using already defined variables
     (e.g. one scope above).
 
-            func foo {
+            fun foo {
                     say 1 + a * 3 + b;
                     my c = 6;
             }
@@ -413,8 +413,8 @@ SELF DEFINING PROCEDURES AND FUNCTIONS
     exception that nested functions will not be available any more after the
     function has been left!
 
-            func foo {
-                    func bar {
+            fun foo {
+                    fun bar {
                             say "Hello i am nested";
                     }
 

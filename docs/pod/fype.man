@@ -533,7 +533,7 @@ keyword in order to check if a procedure has been defined or not.
 A function should be defined with the \fBfunc\fR keyword and deleted with the \fBundef\fR keyword. Function not yet return values (will be changed in future versions) and supports not yet parameter passing (will be changed in future versions). It's using local (lexical scoped) variables. If a certain variable does not exist It's using already defined variables (e.g. one scope above).
 .PP
 .Vb 4
-\&        func foo {
+\&        fun foo {
 \&                say 1 + a * 3 + b;
 \&                my c = 6;
 \&        }
@@ -548,8 +548,8 @@ A function should be defined with the \fBfunc\fR keyword and deleted with the \f
 Nested functions work the same way the nested procedures work, with the exception that nested functions will not be available any more after the function has been left!
 .PP
 .Vb 4
-\&        func foo {
-\&                func bar {
+\&        fun foo {
+\&                fun bar {
 \&                        say "Hello i am nested";
 \&                }
 \&

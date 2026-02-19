@@ -59,7 +59,7 @@ get_tt(char *c_token) {
    CHECK("ret") TT_RET;
    CHECK("const") TT_CONST;
    CHECK("proc") TT_PROC;
-   CHECK("func") TT_FUNC;
+   CHECK("fun") TT_FUNC;
    CHECK("my") TT_MY;
    CHECK("arr") TT_ARR;
    CHECK("!") TT_NOT;

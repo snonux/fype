@@ -148,6 +148,16 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
       switch (tt_op) {
       case TT_ASSIGN:
       {
+         /* Array element assignment: arr[i] = val */
+         if (p_interpret->p_token_array_lhs != NULL) {
+            array_set(p_interpret->p_token_array_lhs->p_array,
+                      p_interpret->i_array_lhs_index,
+                      p_token_store);
+            p_interpret->p_token_array_lhs = NULL;
+            return;
+         }
+
+         /* Regular variable assignment */
          Token *p_token_assign = p_interpret->p_token_temp;
          TokenType tt_assign = token_get_tt(p_token_assign);
 

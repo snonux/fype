@@ -84,6 +84,7 @@ _scope_print_cb	./src/core/scope.c	/^_scope_print_cb(void *p_void, int i_level) 
 _statement	./src/core/interpret.c	/^_statement(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _sum	./src/core/interpret.c	/^_sum(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _term	./src/core/interpret.c	/^_term(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_term_array_access	./src/core/interpret.c	/^_term_array_access(Interpret *p_interpret,$/;"	f	typeref:typename:int
 _tree_print	./src/data/tree.c	/^_tree_print(TreeNode *p_treenode, int i_indent) {$/;"	f	typeref:typename:void
 _tree_print_cb	./src/data/tree.c	/^_tree_print_cb(void *p_void, void *p_indent) {$/;"	f	typeref:typename:void
 _tree_print_cb2	./src/data/tree.c	/^_tree_print_cb2(void *p_void, void *p_indent) {$/;"	f	typeref:typename:void

@@ -405,6 +405,40 @@ assert 0 == (say defined bar);
 
 
 
+# Test array index expressions and slice notation
+
+my a = [10, 20, 30, 40, 50];
+
+# Expression-based index
+my i = 2;
+assert 30 == say a[i];
+assert 40 == say a[i + 1];
+
+# Array element assignment
+a[1] = 99;
+assert 99 == say a[1];
+
+# Basic slice (half-open range: end index is exclusive)
+my sub = a[1:4];
+assert 3 == say len sub;
+assert 99 == say sub[0];
+assert 30 == say sub[1];
+assert 40 == say sub[2];
+
+# Slice from start (low bound omitted)
+my head = a[:2];
+assert 2 == say len head;
+assert 10 == say head[0];
+
+# Slice to end (high bound omitted)
+my tail = a[3:];
+assert 2 == say len tail;
+assert 40 == say tail[0];
+
+# Full copy
+my copy = a[:];
+assert 5 == say len copy;
+
 #*
  * Examples of how to use synonyms
  *#
@@ -457,6 +491,332 @@ assert 2 == say integer 2.8; # Rounds down to the Integer 2
 
 assert say integer double string put say neg 12; # Nonsense but working :)
 
+
+#*
+ * Fype uber-example: exercises every language feature.
+ * Every assertion must pass for the script to exit cleanly.
+ *#
+
+# ─── 1. COMMENTS ─────────────────────────────────────────────────────────────
+
+# Single-line comment — ignored completely.
+
+#*
+ * Block comment: also ignored.
+ *#
+
+# Inline block comment inside an expression:
+my commentsok = 1 #* this is ignored *# + 1;
+assert 2 == say commentsok;
+
+# ─── 2. VARIABLES AND BASIC ARITHMETIC ───────────────────────────────────────
+
+# Multiple declarations on one line; bay gets the default value 0
+my x = 10, y = 3, bay;
+assert 0  == say bay;
+assert 13 == say x + y;
+assert 7  == say x - y;
+assert 30 == say x * y;
+assert 3  == say x / y;     # integer division truncates toward zero
+assert 10 == say 2 * (4 + 2) - 2;
+assert 10 == say (8 / 2) + 2 * 3;
+
+x = x + 1;
+assert 11 == say x;
+
+# ─── 3. NEGATION AND NOT ──────────────────────────────────────────────────────
+
+assert 5        == say neg neg 5;
+assert 0        == say neg neg 0;
+assert (neg 1)  == (say neg not 0);  # not 0 => 1, neg 1 => -1
+
+# ─── 4. INCREMENT / DECREMENT ────────────────────────────────────────────────
+
+my counter = 5;
+incr counter;
+assert 6 == say counter;
+decr counter;
+decr counter;
+assert 4 == say counter;
+
+# ─── 5. TYPE CONVERSION ───────────────────────────────────────────────────────
+
+assert 2 == say integer 2.8;       # truncates toward zero
+assert 1 == say double 1;          # 1.0 compared as 1
+assert 14 == say 1 + string 13;    # "13" coerced to integer 13
+assert 5 == say "10 bla" / 2;      # leading digits extracted
+
+# ─── 6. STRING ARITHMETIC ────────────────────────────────────────────────────
+
+assert 46   == say "12" + "34";    # "12"->12 + "34"->34 = 46
+assert 1231 == say "1234" - "3";   # 1234 - 3 = 1231
+assert 5    == say "10 bla" / 2;
+
+# ─── 7. COMPARISON OPERATORS ─────────────────────────────────────────────────
+
+assert 1 == (put 5 > 3);   assert 0 == (say 5 > 5);
+assert 1 == (put 5 >= 5);  assert 0 == (say 4 >= 5);
+assert 1 == (put 3 < 5);   assert 0 == (say 5 < 5);
+assert 1 == (put 3 <= 5);  assert 0 == (say 6 <= 5);
+assert 1 == (put 5 == 5);  assert 0 == (say 4 == 5);
+assert 1 == (put 5 != 4);  assert 0 == (say 5 != 5);
+
+# ─── 8. BITWISE OPERATORS ────────────────────────────────────────────────────
+
+assert 1 == say (5 and 3);    # 0b101 & 0b011 = 0b001 = 1
+assert 7 == say (5 or 2);     # 0b101 | 0b010 = 0b111 = 7
+assert 6 == say (5 xor 3);    # 0b101 ^ 0b011 = 0b110 = 6
+assert 8 == say (2 :< 2);     # 2 << 2 = 8
+assert 2 == say (8 :> 2);     # 8 >> 2 = 2
+assert 0 == say (1 and 0);
+assert 1 == say (0 or 1);
+assert 0 == say (1 xor 1);
+
+# ─── 9. CONDITIONALS ─────────────────────────────────────────────────────────
+
+my flag = 0;
+if 1 { flag = 1; }
+assert 1 == say flag;
+
+ifnot 0 { flag = 2; }
+assert 2 == say flag;
+
+if 0    { flag = 99; }   # must not execute
+ifnot 1 { flag = 99; }   # must not execute
+assert 2 == say flag;
+
+# ─── 10. WHILE AND UNTIL ─────────────────────────────────────────────────────
+
+my cnt = 0;
+while cnt < 5 { cnt = cnt + 1; }
+assert 5 == say cnt;
+
+cnt = 0;
+until cnt >= 4 { cnt = cnt + 1; }
+assert 4 == say cnt;
+
+# ─── 11. LOOP WITH BREAK AND NEXT ────────────────────────────────────────────
+
+my n = 0;
+loop {
+    n = n + 1;
+    if n == 7 { break; }
+}
+assert 7 == say n;
+
+# Sum 1..10 skipping multiples of 3: 1+2+4+5+7+8+10 = 37
+my total = 0, step = 0;
+loop {
+    step = step + 1;
+    if step > 10            { break; }
+    if step / 3 * 3 == step { next;  }  # divisible by 3
+    total = total + step;
+}
+assert 37 == say total;
+
+# ─── 12. WHILE WITH BREAK AND NEXT ───────────────────────────────────────────
+
+# Sum 1..10 skipping 5, stopping after 8: 1+2+3+4 + 6+7+8 = 31
+my wsum = 0, wi = 0;
+while wi < 10 {
+    wi = wi + 1;
+    if wi == 5 { next; }
+    if wi > 8  { break; }
+    wsum = wsum + wi;
+}
+assert 31 == say wsum;
+
+# ─── 13. DO-WHILE / DO-UNTIL ─────────────────────────────────────────────────
+
+# Body runs once even though the condition is already false
+my dw = 10;
+do { dw = dw + 1; } while dw < 10;
+assert 11 == say dw;
+
+my du = 0;
+do { du = du + 1; } until du == 5;
+assert 5 == say du;
+
+# ─── 14. PROCEDURES ──────────────────────────────────────────────────────────
+
+# Procedures share the caller's scope; mutations are visible to the caller
+my acc = 0;
+proc bump { acc = acc + 10; }
+bump;
+bump;
+assert 20 == say acc;
+
+# Variables declared inside a procedure leak into the caller's scope
+proc initcoords { my cx = 3; my cy = 7; }
+initcoords;
+assert 3 == say cx;
+assert 7 == say cy;
+
+# ─── 15. FUNCTIONS ───────────────────────────────────────────────────────────
+
+# Zero-arg function with explicit return
+fun answer() { ret 42; }
+assert 42 == say answer();
+
+# Single-arg
+fun square(m) { ret m * m; }
+assert 25 == say square(5);
+assert 0  == say square(0);
+
+# Two-arg
+fun add(a, b) { ret a + b; }
+assert 9 == say add(4, 5);
+
+# Conditional return
+fun absval(v) {
+    if v < 0 { ret neg v; }
+    ret v;
+}
+assert 7 == say absval(7);
+assert 7 == say absval(neg 7);
+
+# Iterative function with local variables and decr
+fun factorial(num) {
+    my result = 1;
+    while num > 1 {
+        result = result * num;
+        decr num;
+    }
+    ret result;
+}
+assert 1   == say factorial(0);
+assert 1   == say factorial(1);
+assert 120 == say factorial(5);
+assert 720 == say factorial(6);
+
+# Iterative fibonacci using local variables
+fun fib(num) {
+    if num <= 1 { ret num; }
+    my fa = 0, fb = 1, ftmp = 0, fi = 2;
+    while fi <= num {
+        ftmp = fa + fb;
+        fa = fb;
+        fb = ftmp;
+        fi = fi + 1;
+    }
+    ret fb;
+}
+assert 0  == say fib(0);
+assert 1  == say fib(1);
+assert 1  == say fib(2);
+assert 8  == say fib(6);
+assert 55 == say fib(10);
+
+# Old-style zero-arg function (no parentheses)
+fun greet { say "hello from greet"; }
+greet;
+
+# Multiple return values both land on the caller's stack (printed here)
+fun minmax(a, b) {
+    if a < b { ret a, b; }
+    ret b, a;
+}
+say minmax(3, 7);   # prints 3 then 7
+
+# ─── 16. SCOPING ─────────────────────────────────────────────────────────────
+
+my outer = 100;
+{
+    my inner = 200;
+    outer = outer + inner;
+    assert 1 == defined inner;
+}
+assert 300 == say outer;
+assert 0   == defined inner;
+
+# Variables defined in nested blocks vanish when the block closes
+my depth = 0;
+{
+    depth = depth + 1;
+    {
+        depth = depth + 1;
+        { depth = depth + 1; }
+        assert 3 == say depth;
+    }
+}
+assert 3 == say depth;
+
+# ─── 17. SYNONYMS / ALIASES ──────────────────────────────────────────────────
+
+my orig = 42;
+my alias = \orig;
+assert 42 == say alias;    # alias starts with orig's value
+
+orig = 99;
+assert 99 == say alias;    # alias reflects the change
+
+assert 2 == syms orig;     # two symbols point to the same value
+undef orig;
+assert 1 == syms alias;
+assert 0 == defined orig;
+assert 1 == defined alias;
+undef alias;
+
+# Procedure synonym
+proc grp { say "grp called"; }
+my grp2 = \grp;
+assert 2 == syms grp;
+grp2;                      # still callable through the alias
+undef grp;
+grp2;                      # alias keeps it alive
+assert 0 == defined grp;
+undef grp2;
+
+# ─── 18. DEFINED AND UNDEF ───────────────────────────────────────────────────
+
+my tmpvar = 5;
+assert 1 == defined tmpvar;
+assert 0 == defined nosuchvar;
+undef tmpvar;
+assert 0 == defined tmpvar;
+
+# ─── 19. ARRAYS — LITERALS, INDEXING, ASSIGNMENT ────────────────────────────
+
+my nums = [10, 20, 30, 40, 50];
+assert 5  == say len nums;
+assert 10 == say nums[0];
+assert 30 == say nums[2];
+assert 50 == say nums[4];
+
+# Expression-based index
+my idx = 1;
+assert 20 == say nums[idx];
+assert 30 == say nums[idx + 1];
+
+# Element assignment
+nums[2] = 99;
+assert 99 == say nums[2];
+
+# ─── 20. ARRAY SLICES ────────────────────────────────────────────────────────
+
+# nums is now [10, 20, 99, 40, 50]
+my sl = nums[1:4];    # half-open: indices 1, 2, 3
+assert 3  == say len sl;
+assert 20 == say sl[0];
+assert 99 == say sl[1];
+assert 40 == say sl[2];
+
+my head = nums[:2];   # first two elements
+assert 2  == say len head;
+assert 10 == say head[0];
+assert 20 == say head[1];
+
+my tail = nums[3:];   # from index 3 to end
+assert 2  == say len tail;
+assert 40 == say tail[0];
+assert 50 == say tail[1];
+
+my cpy = nums[:];     # full shallow copy
+assert 5  == say len cpy;
+assert 10 == say cpy[0];
+assert 50 == say cpy[4];
+
+say "All assertions passed.";
 
 #*
  * Examples of how to define variables

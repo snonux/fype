@@ -66,6 +66,10 @@ typedef struct {
    Token *p_token_prev;
    TokenType tt_prev;
    Token *p_token_temp;
+   /* LHS array token set by _term_array_access for arr[i] = val */
+   Token *p_token_array_lhs;
+   /* Array index set alongside p_token_array_lhs */
+   int    i_array_lhs_index;
 } Interpret;
 
 Interpret* interpret_new(List *p_list_token, Hash *p_hash_syms);

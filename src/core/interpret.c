@@ -74,6 +74,8 @@ int _program(Interpret *p_interpret);
 int _statement(Interpret *p_interpret);
 int _sum(Interpret *p_interpret);
 int _term(Interpret *p_interpret);
+int _term_array_access(Interpret *p_interpret,
+                       Token *p_token_array, Array *p_array);
 int _var_assign(Interpret *p_interpret);
 int _var_decl(Interpret *p_interpret);
 int _var_list(Interpret *p_interpret);
@@ -99,6 +101,8 @@ interpret_new(List *p_list_token, Hash *p_hash_syms) {
    p_interpret->tt_prev = TT_NONE;
    p_interpret->p_token_prev = NULL;
    p_interpret->p_token_temp = NULL;
+   p_interpret->p_token_array_lhs = NULL;
+   p_interpret->i_array_lhs_index = 0;
    p_interpret->ct = CONTROL_NONE;
 
    return (p_interpret);
@@ -860,6 +864,13 @@ _sum(Interpret *p_interpret) {
 
          switch (p_interpret->tt) {
          case TT_DDOT:
+            /* ':' is a shift-operator prefix only when followed by
+             * '<' or '>'; otherwise it is a slice separator so stop.
+             */
+            if (_NEXT_TT != TT_LT && _NEXT_TT != TT_GT) {
+               b_flag = false;
+               break;
+            }
             p_token_tmp = p_interpret->p_token;
             _NEXT
          case TT_ADD:
@@ -941,6 +952,9 @@ int
 _product2(Interpret *p_interpret) {
    _CHECK TRACK
 
+   /* Clear any stale array LHS left from a preceding expression */
+   p_interpret->p_token_array_lhs = NULL;
+
    if (_term(p_interpret)) {
       _Bool b_flag = true;
 
@@ -949,11 +963,17 @@ _product2(Interpret *p_interpret) {
                && IS_NOT_OPERATOR(_NEXT_TT)) {
             Token *p_token = p_interpret->p_token;
             Token *p_token_temp = p_interpret->p_token_prev;
+            /* Save array LHS set by _term; RHS evaluation clears it */
+            Token *p_lhs = p_interpret->p_token_array_lhs;
+            int i_lhs_idx = p_interpret->i_array_lhs_index;
             _NEXT
 
             if (!_expression_(p_interpret))
                _INTERPRET_ERROR("Expected expression", p_token);
 
+            /* Restore array LHS so function_process can assign it */
+            p_interpret->p_token_array_lhs = p_lhs;
+            p_interpret->i_array_lhs_index = i_lhs_idx;
             p_interpret->p_token_temp = p_token_temp;
             function_process(p_interpret, p_token, NULL,
                              p_interpret->p_stack, 2);
@@ -969,6 +989,86 @@ _product2(Interpret *p_interpret) {
    }
 
    return (0);
+}
+
+/* Evaluate an array index or slice expression and push the result.
+ *
+ * On entry the current token is the array identifier. The function
+ * advances past `arr[...]` and pushes the result onto the stack.
+ *
+ * Supported forms (half-open range, end is exclusive):
+ *   arr[i]    single element at index i
+ *   arr[i:j]  sub-array of elements [i, j)
+ *   arr[i:]   elements from i to end
+ *   arr[:j]   elements from start up to j
+ *   arr[:]    full copy
+ *
+ * For single-element access, sets p_token_array_lhs / i_array_lhs_index
+ * so that _product2 can dispatch arr[i] = val to the right handler.
+ */
+int
+_term_array_access(Interpret *p_interpret,
+                   Token *p_token_array, Array *p_array) {
+   _NEXT                    /* advance past identifier, now at '[' */
+   _NEXT                    /* advance past '[', now at index start */
+
+   /* Evaluate the low bound.  _expression_ stops before ':' because
+    * _sum now only treats ':' as a shift prefix when the next token
+    * is '<' or '>'.  Returns 0 and pushes nothing for arr[:j]. */
+   int i_low = 0;
+   if (_expression_(p_interpret))
+      i_low = convert_to_integer_get(
+                 stack_pop(p_interpret->p_stack));
+
+   /* Skip the auto-semicolon the scanner inserts before ']' */
+   if (p_interpret->tt == TT_SEMICOLON)
+      _NEXT
+
+   if (p_interpret->tt == TT_DDOT) {     /* slice: arr[i:j] etc. */
+      _NEXT                               /* advance past ':' */
+
+      /* Default: slice extends to the end of the array */
+      int i_high = array_get_used(p_array);
+
+      /* Evaluate explicit high bound if not immediately at ']' */
+      if (p_interpret->tt != TT_PARANT_AR
+            && p_interpret->tt != TT_SEMICOLON) {
+         if (!_expression_(p_interpret))
+            _INTERPRET_ERROR("Expected high-bound expression",
+                             p_interpret->p_token);
+         i_high = convert_to_integer_get(
+                     stack_pop(p_interpret->p_stack));
+      }
+
+      /* Skip auto-semicolon before ']' */
+      if (p_interpret->tt == TT_SEMICOLON)
+         _NEXT
+
+      /* Build sub-array [i_low, i_high) — shallow copy of pointers.
+       * Elements are shared with the original array; do not ref-up
+       * because the GC tracks all tokens at ref_count 0. */
+      int i_len = i_high - i_low;
+      Token *p_sub = token_new_array(i_len > 0 ? i_len : 1);
+      for (int i = i_low; i < i_high; ++i) {
+         Token *p_elem = array_get(p_array, i);
+         if (p_elem != NULL)
+            array_unshift(p_sub->p_array, p_elem);
+      }
+      stack_push(p_interpret->p_stack, p_sub);
+
+   } else {                              /* single index: arr[i] */
+      /* Record LHS info so _product2 can handle arr[i] = val */
+      p_interpret->p_token_array_lhs = p_token_array;
+      p_interpret->i_array_lhs_index = i_low;
+      stack_push(p_interpret->p_stack, array_get(p_array, i_low));
+   }
+
+   /* Consume ']' */
+   if (p_interpret->tt != TT_PARANT_AR)
+      _INTERPRET_ERROR("Expected ']'", p_interpret->p_token);
+   _NEXT                                /* advance past ']' */
+
+   return (1);
 }
 
 int
@@ -993,24 +1093,22 @@ _term(Interpret *p_interpret) {
    {
       if (_NEXT_TT != TT_ASSIGN) {
          if (_NEXT_TT == TT_PARANT_AL) {
-            Token *p_token_var = p_interpret->p_token;
-            char *c_name = token_get_val(p_token_var);
-            Symbol *p_symbol = scope_get(p_interpret->p_scope, c_name);
+            /* Delegate to the array-access / slice helper */
+            char *c_name = token_get_val(p_interpret->p_token);
+            Symbol *p_symbol = scope_get(
+                                  p_interpret->p_scope, c_name);
 
             if (p_symbol == NULL)
-               _INTERPRET_ERROR("No such symbol", p_token_var);
+               _INTERPRET_ERROR("No such symbol",
+                                p_interpret->p_token);
             Token *p_token_array = symbol_get_val(p_symbol);
             Array *p_array = TOKEN_GET_ARRAY(p_token_array);
             if (p_array == NULL)
-               _INTERPRET_ERROR("Expected an array", p_interpret->p_token);
+               _INTERPRET_ERROR("Expected an array",
+                                p_interpret->p_token);
 
-            _NEXT2
-            Token *p_token_val = array_get(p_array,
-                                           convert_to_integer_get(p_interpret->p_token));
-            stack_push(p_interpret->p_stack, p_token_val);
-            _NEXT
-
-            return (1);
+            return (_term_array_access(p_interpret,
+                                       p_token_array, p_array));
 
          } else if (function_is_buildin(p_interpret->p_token)) {
             Token *p_token = p_interpret->p_token;

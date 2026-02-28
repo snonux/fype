@@ -47,8 +47,6 @@
 #define IS_NOT_KEYWORD(t) !IS_KEYWORD(t)
 #define IS_OPERATOR(t) (START_OPERATORS < t && t < END_OPERATORS)
 #define IS_NOT_OPERATOR(t) !IS_OPERATOR(t)
-#define IS_NON_TERMINAL(t) (START_NON_TERMINALS < t && t < END_NON_TERMINALS)
-#define IS_NOT_NON_TERMINAL(t) !IS_NON_TERMINAL(t)
 #define IS_IDENT(t) (t == TT_IDENT)
 #define IS_NOT_IDENT(t) !(IS_IDENT(t))
 #define IS_ASSIGNABLE(t) (START_ASSIGNABLES < t && t < END_ASSIGNABLES)
@@ -78,8 +76,6 @@ typedef enum {
    // Diverse
    TT_NONE,
    TT_END_OF_CODE,
-   TT_BOOL, // Temporaly disabled, maybe NUMERICAL in future again
-
    // Diverse types
    START_TERMINALS,
    START_TYPES,
@@ -147,7 +143,6 @@ typedef enum {
    TT_MULT,
    TT_NEQ,
    TT_NOT,
-   TT_NOTEQ,
    TT_OR,
    TT_RE,
    TT_RSHIFT,
@@ -177,7 +172,6 @@ typedef struct {
 Token* token_new(char *c_val, TokenType tt_cur, int i_line_nr,
                  int i_pos_nr, char *c_filename);
 Token* token_new_integer(int i_val);
-Token* token_new_couble(double d_val);
 Token* token_new_string(char *c_val);
 Token* token_new_array(int i_size);
 Token* token_new_copy(Token *p_token);

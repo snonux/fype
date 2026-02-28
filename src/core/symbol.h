@@ -44,8 +44,6 @@
 #define symbol_get_val(s) s->p_val
 #define symbol_get_sym(s) s->sym
 #define symbol_ref_up(s) ++s->i_refs
-#define IS_A_FUNCTION(s) (s == SYM_INLINEFUNCTION || s == SYM_FUNCTION)
-#define IS_NOT_A_FUNCTION(s) !IS_A_FUNCTION(s)
 
 typedef enum {
    SYM_BUILDIN,

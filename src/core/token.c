@@ -112,7 +112,6 @@ tt_get_name(TokenType tt_cur) {
       CASE(TT_STRING,"TT_STRING")
       CASE(TT_ARRAY,"TT_ARRAY")
       CASE(TT_INTEGER,"TT_INTEGER")
-      CASE(TT_BOOL,"TT_BOOL")
       CASE(END_ASSIGNABLES, "END_ASSIGNABLES")
       CASE(END_NUMERICAL, "END_NUMERICAL")
       CASE(END_TYPES, "END_TYPES")
@@ -176,7 +175,6 @@ tt_get_name(TokenType tt_cur) {
       CASE(TT_MULT,"TT_MULT")
       CASE(TT_NEQ,"TT_NEQ")
       CASE(TT_RE,"TT_RE")
-      CASE(TT_NOTEQ,"TT_NOTEQ")
       CASE(TT_SEMICOLON,"TT_SEMICOLON")
       CASE(TT_SUB,"TT_SUB")
       CASE(END_OPERATORS, "END_OPERATORS")
@@ -230,15 +228,6 @@ token_new_integer(int i_val) {
    Token *p_token = token_new_dummy();
    token_set_tt(p_token, TT_INTEGER);
    token_set_ival(p_token, i_val);
-
-   return (p_token);
-}
-
-Token*
-token_new_double(double d_val) {
-   Token *p_token = token_new_dummy();
-   token_set_tt(p_token, TT_DOUBLE);
-   token_set_dval(p_token, d_val);
 
    return (p_token);
 }

@@ -1352,13 +1352,11 @@ interpret_subprocess(Interpret *p_interpret, List *p_list_token) {
    return (i_ret);
 }
 
+/* Create an interpreter, run it over the token list, then tear it down. */
 void
-interpret_run(Fype *p_fype) {
-   Interpret *p_interpret =
-      interpret_new(p_fype->p_list_token, p_fype->p_hash_syms);
-
+interpret_run(List *p_list_token, Hash *p_hash_syms) {
+   Interpret *p_interpret = interpret_new(p_list_token, p_hash_syms);
    interpret_process(p_interpret);
-
    interpret_delete(p_interpret);
 }
 

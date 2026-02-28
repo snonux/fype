@@ -46,7 +46,6 @@ LIST_GARBAGE	./src/core/garbage.c	/^List *LIST_GARBAGE = NULL;$/;"	v	typeref:typ
 TOKEN_ID_COUNTER	./src/core/token.c	/^long TOKEN_ID_COUNTER = 0;$/;"	v	typeref:typename:long
 _ADD_SEMICOLON_INDEX	./src/core/scanner.c	/^#define _ADD_SEMICOLON_INDEX /;"	d	file:
 _CHECK	./src/core/interpret.c	/^#define _CHECK /;"	d	file:
-_CODESTR_INDEX	./src/core/scanner.c	/^int _CODESTR_INDEX = 0;$/;"	v	typeref:typename:int
 _FUNCTIONS_ERROR	./src/core/functions.c	/^#define _FUNCTIONS_ERROR(/;"	d	file:
 _GARBAGE_ERROR	./src/core/garbage.c	/^#define _GARBAGE_ERROR(/;"	d	file:
 _Garbage	./src/core/garbage.c	/^} _Garbage;$/;"	t	typeref:struct:__anoneaa3b3cb0108	file:
@@ -256,7 +255,7 @@ hash_size	./src/data/hash.c	/^hash_size(Hash *p_hash, int i_size) {$/;"	f	typere
 interpret_delete	./src/core/interpret.c	/^interpret_delete(Interpret *p_interpret) {$/;"	f	typeref:typename:void
 interpret_new	./src/core/interpret.c	/^interpret_new(List *p_list_token, Hash *p_hash_syms) {$/;"	f	typeref:typename:Interpret *
 interpret_process	./src/core/interpret.c	/^interpret_process(Interpret *p_interpret) {$/;"	f	typeref:typename:int
-interpret_run	./src/core/interpret.c	/^interpret_run(Fype *p_fype) {$/;"	f	typeref:typename:void
+interpret_run	./src/core/interpret.c	/^interpret_run(List *p_list_token, Hash *p_hash_syms) {$/;"	f	typeref:typename:void
 interpret_subprocess	./src/core/interpret.c	/^interpret_subprocess(Interpret *p_interpret, List *p_list_token) {$/;"	f	typeref:typename:int
 list_add_back	./src/data/list.c	/^list_add_back(List *p_list, void *p_val) {$/;"	f	typeref:typename:void
 list_add_front	./src/data/list.c	/^list_add_front(List *p_list, void *p_val) {$/;"	f	typeref:typename:void
@@ -353,7 +352,7 @@ scanner_delete	./src/core/scanner.c	/^scanner_delete(Scanner *p_scanner) {$/;"	f
 scanner_get_tt_cur	./src/core/scanner.c	/^scanner_get_tt_cur(char *c_token) {$/;"	f	typeref:typename:TokenType
 scanner_new	./src/core/scanner.c	/^scanner_new(List *p_list_token, Tupel *p_tupel_argv) {$/;"	f	typeref:typename:Scanner *
 scanner_post_task	./src/core/scanner.c	/^scanner_post_task(Scanner *p_scanner) {$/;"	f	typeref:typename:void
-scanner_run	./src/core/scanner.c	/^scanner_run(Fype *p_fype) {$/;"	f	typeref:typename:void
+scanner_run	./src/core/scanner.c	/^scanner_run(List *p_list_token, Tupel *p_tupel_argv,$/;"	f	typeref:typename:void
 scope_delete	./src/core/scope.c	/^scope_delete(Scope *p_scope) {$/;"	f	typeref:typename:void
 scope_down	./src/core/scope.c	/^scope_down(Scope *p_scope) {$/;"	f	typeref:typename:void
 scope_exists	./src/core/scope.c	/^scope_exists(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:_Bool

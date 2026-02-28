@@ -38,9 +38,11 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "../argv.h"
+
 const char _TOKENENDS[] = "}])+-*/={([<>;:,.!";
 #define _ADD_SEMICOLON_INDEX 2
-int _CODESTR_INDEX = 0;
+/* _CODESTR_INDEX was removed; use p_scanner->i_codestr_index instead. */
 
 Scanner*
 scanner_new(List *p_list_token, Tupel *p_tupel_argv) {
@@ -69,6 +71,7 @@ scanner_new(List *p_list_token, Tupel *p_tupel_argv) {
 
    p_scanner->i_current_line_nr = 1;
    p_scanner->i_current_pos_nr = 0;
+   p_scanner->i_codestr_index = 0;   /* start of inline code string */
 
    p_scanner->i_num_tokenends = strlen(_TOKENENDS);
    p_scanner->tt_last = TT_NONE;
@@ -148,7 +151,7 @@ _scanner_has_next_char(Scanner *p_scanner) {
    if (p_scanner->fp)
       return !feof(p_scanner->fp);
 
-   return p_scanner->c_codestring[_CODESTR_INDEX] != 0;
+   return p_scanner->c_codestring[p_scanner->i_codestr_index] != 0;
 }
 
 char
@@ -156,13 +159,19 @@ _scanner_get_next_char(Scanner *p_scanner) {
    if (p_scanner->fp)
       return fgetc(p_scanner->fp);
 
-   return (p_scanner->c_codestring[_CODESTR_INDEX++]);
+   return (p_scanner->c_codestring[p_scanner->i_codestr_index++]);
 }
 
+/* Tokenise p_list_token from source given in p_tupel_argv, then
+ * post-process the token list.  Sets *c_filename_out to the source
+ * filename (NULL for inline -e mode); the pointer is owned by the
+ * argv Dat — do not free it.  Verbose printing and basename extraction
+ * are the caller's responsibility. */
 void
-scanner_run(Fype *p_fype) {
-   Scanner *p_scanner = scanner_new(p_fype->p_list_token,
-                                    p_fype->p_tupel_argv);
+scanner_run(List *p_list_token, Tupel *p_tupel_argv,
+            char **c_filename_out) {
+
+   Scanner *p_scanner = scanner_new(p_list_token, p_tupel_argv);
 
    int i_token_len = 0;
    char *c_token = malloc(sizeof(char));
@@ -219,7 +228,8 @@ scanner_run(Fype *p_fype) {
                   p_scanner->i_current_pos_nr = 0;
 
                   i_token_len += 2;
-                  c_token = realloc(c_token, sizeof(char) * (i_token_len + 1));
+                  c_token = realloc(c_token,
+                                    sizeof(char) * (i_token_len + 1));
                   c_token[i_token_len-2] = '\\';
                   c_token[i_token_len-1] = 'n';
                   c_token[i_token_len] = 0;
@@ -235,14 +245,16 @@ scanner_run(Fype *p_fype) {
 
                } else {
                   ++i_token_len;
-                  c_token = realloc(c_token, sizeof(char) * (i_token_len + 1));
+                  c_token = realloc(c_token,
+                                    sizeof(char) * (i_token_len + 1));
                   c_token[i_token_len-1] = c;
                   c_token[i_token_len] = 0;
                }
 
             } while ( _scanner_has_next_char(p_scanner) );
 
-            scanner_add_token(p_scanner, &c_token, &i_token_len, TT_STRING);
+            scanner_add_token(p_scanner, &c_token, &i_token_len,
+                              TT_STRING);
 
             if (i_num_nl)
                p_scanner->i_current_line_nr += i_num_nl;
@@ -278,7 +290,8 @@ scanner_run(Fype *p_fype) {
             if ((!isalpha(d) && !isdigit(d) /*&& d != '-'*/) &&
                   (isalpha(c) || isdigit(c))) {
 
-               scanner_add_token(p_scanner, &c_token, &i_token_len, tt_cur);
+               scanner_add_token(p_scanner, &c_token, &i_token_len,
+                                 tt_cur);
 
             } else {
                for (int i = 0; i < p_scanner->i_num_tokenends; ++i) {
@@ -300,38 +313,22 @@ scanner_run(Fype *p_fype) {
       }
    }
 
-   if (argv_checkopts("e", p_fype->p_tupel_argv) && i_token_len) {
+   if (argv_checkopts("e", p_tupel_argv) && i_token_len) {
       TokenType tt_cur = scanner_get_tt_cur(c_token);
       scanner_add_token(p_scanner, &c_token, &i_token_len, tt_cur);
    }
 
-   /* Check if there is a ; missing */
-   List *p_list_token = scanner_get_list_token(p_scanner);
-   Token *p_last_token = list_last(p_list_token);
+   /* Ensure the token list is properly terminated with a semicolon */
+   List *p_list = scanner_get_list_token(p_scanner);
+   Token *p_last_token = list_last(p_list);
    if (token_get_tt(p_last_token) != TT_SEMICOLON)
       _add_semicolon_to_list(p_scanner);
 
    scanner_post_task(p_scanner);
 
-   char *c_filename = scanner_get_filename(p_scanner);
+   /* Return the filename to the caller; NULL for inline (-e) mode */
+   *c_filename_out = scanner_get_filename(p_scanner);
    scanner_delete(p_scanner);
-
-   if (argv_checkopts("TV", p_fype->p_tupel_argv))
-      list_iterate(p_fype->p_list_token, token_print_cb);
-
-   char *c_basename = NULL;
-   if (c_filename) {
-      int i_len = strlen(c_filename) - 3;
-      c_basename = calloc(i_len+1, sizeof(char));
-      strncpy(c_basename, c_filename, i_len);
-      c_basename[i_len] = 0;
-
-   } else {
-      char *c_basename = calloc(1, sizeof(char));
-      c_basename[0] = 0;
-   }
-
-   p_fype->c_basename = c_basename;
 }
 
 void

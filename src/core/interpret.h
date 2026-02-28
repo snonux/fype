@@ -40,8 +40,6 @@
 #include "../data/stack.h"
 #include "../data/hash.h"
 
-#include "../fype.h"
-
 #include "garbage.h"
 #include "scope.h"
 #include "token.h"
@@ -74,7 +72,7 @@ typedef struct {
 
 Interpret* interpret_new(List *p_list_token, Hash *p_hash_syms);
 void interpret_delete(Interpret *p_interpret);
-void interpret_run(Fype *p_type);
+void interpret_run(List *p_list_token, Hash *p_hash_syms);
 int interpret_process(Interpret *p_interpret);
 int interpret_subprocess(Interpret *p_interpret, List *p_list_token);
 

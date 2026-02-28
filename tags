@@ -38,6 +38,8 @@
 !_TAG_ROLE_DESCRIPTION!C!struct	foreigndecl	/declared in foreign languages/
 ARGV_OSLEN	./src/argv.c	/^#define ARGV_OSLEN /;"	d	file:
 BINARY	./src/argv.c	/^char *BINARY;$/;"	v	typeref:typename:char *
+BuiltinEntry	./src/core/functions.c	/^} BuiltinEntry;$/;"	t	typeref:struct:__anonc43baffb0108	file:
+BuiltinFn	./src/core/functions.c	/^typedef void (*BuiltinFn)(Interpret *p_interpret,$/;"	t	typeref:typename:void (*)(Interpret * p_interpret,Stack * p_stack_args,Token * p_token_ident)	file:
 CASE	./src/core/token.c	/^#define CASE(/;"	d	file:
 CHECK	./src/core/token.c	/^#define CHECK(/;"	d	file:
 LIST_GARBAGE	./src/core/garbage.c	/^List *LIST_GARBAGE = NULL;$/;"	v	typeref:typename:List *
@@ -56,13 +58,40 @@ _NEXT_ORG	./src/core/interpret.c	/^#define _NEXT_ORG /;"	d	file:
 _NEXT_TT	./src/core/interpret.c	/^#define _NEXT_TT /;"	d	file:
 _SKIP	./src/core/interpret.c	/^#define _SKIP /;"	d	file:
 _TOKENENDS	./src/core/scanner.c	/^const char _TOKENENDS[] = "}])+-*\/={([<>;:,.!";$/;"	v	typeref:typename:const char[]
+__anonc43baffb0108	./src/core/functions.c	/^typedef struct {$/;"	s	file:
 __anoneaa3b3cb0108	./src/core/garbage.c	/^typedef struct {$/;"	s	file:
 _add_semicolon_to_list	./src/core/scanner.c	/^_add_semicolon_to_list(Scanner *p_scanner) {$/;"	f	typeref:typename:void
 _block	./src/core/interpret.c	/^_block(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _block_get	./src/core/interpret.c	/^_block_get(Interpret *p_interpret, List *p_list_block) {$/;"	f	typeref:typename:int
 _block_skip	./src/core/interpret.c	/^_block_skip(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_builtin_assert	./src/core/functions.c	/^_builtin_assert(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_decr	./src/core/functions.c	/^_builtin_decr(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_double	./src/core/functions.c	/^_builtin_double(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_end	./src/core/functions.c	/^_builtin_end(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_exit	./src/core/functions.c	/^_builtin_exit(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_fork	./src/core/functions.c	/^_builtin_fork(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_gc	./src/core/functions.c	/^_builtin_gc(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_incr	./src/core/functions.c	/^_builtin_incr(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_ind	./src/core/functions.c	/^_builtin_ind(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_integer	./src/core/functions.c	/^_builtin_integer(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_len	./src/core/functions.c	/^_builtin_len(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_ln	./src/core/functions.c	/^_builtin_ln(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_neg	./src/core/functions.c	/^_builtin_neg(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_no	./src/core/functions.c	/^_builtin_no(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_not	./src/core/functions.c	/^_builtin_not(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_put	./src/core/functions.c	/^_builtin_put(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_refs	./src/core/functions.c	/^_builtin_refs(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_say	./src/core/functions.c	/^_builtin_say(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_scope	./src/core/functions.c	/^_builtin_scope(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_string	./src/core/functions.c	/^_builtin_string(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
+_builtin_yes	./src/core/functions.c	/^_builtin_yes(Interpret *p_interpret, Stack *p_stack_args,$/;"	f	typeref:typename:void	file:
 _compare	./src/core/interpret.c	/^_compare(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _control	./src/core/interpret.c	/^_control(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_control_do	./src/core/interpret.c	/^_control_do(Interpret *p_interpret) {$/;"	f	typeref:typename:int	file:
+_control_if_ifnot	./src/core/interpret.c	/^_control_if_ifnot(Interpret *p_interpret) {$/;"	f	typeref:typename:int	file:
+_control_loop	./src/core/interpret.c	/^_control_loop(Interpret *p_interpret) {$/;"	f	typeref:typename:int	file:
+_control_while_until	./src/core/interpret.c	/^_control_while_until(Interpret *p_interpret) {$/;"	f	typeref:typename:int	file:
+_eval_expr_list	./src/core/interpret.c	/^_eval_expr_list(Interpret *p_interpret, List *p_list_expr) {$/;"	f	typeref:typename:Token *	file:
 _expression	./src/core/interpret.c	/^_expression(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _expression_	./src/core/interpret.c	/^_expression_(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _expression_get	./src/core/interpret.c	/^_expression_get(Interpret *p_interpret, List *p_list_expression) {$/;"	f	typeref:typename:int
@@ -71,12 +100,29 @@ _indent	./src/data/tree.c	/^void _indent(int i_indent) {$/;"	f	typeref:typename:
 _list_copy_cb	./src/data/list.c	/^_list_copy_cb(void *p_void1, void *p_cpy) {$/;"	f	typeref:typename:void
 _next	./src/core/interpret.c	/^_next(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _next_tt	./src/core/interpret.c	/^_next_tt(Interpret *p_interpret) {$/;"	f	typeref:typename:TokenType
+_op_add	./src/core/functions.c	/^_op_add(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_and	./src/core/functions.c	/^_op_and(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_assign	./src/core/functions.c	/^_op_assign(Interpret *p_interpret, Token *p_token_store) {$/;"	f	typeref:typename:void	file:
+_op_div	./src/core/functions.c	/^_op_div(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_eq	./src/core/functions.c	/^_op_eq(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_ge	./src/core/functions.c	/^_op_ge(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_gt	./src/core/functions.c	/^_op_gt(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_le	./src/core/functions.c	/^_op_le(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_lshift	./src/core/functions.c	/^_op_lshift(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_lt	./src/core/functions.c	/^_op_lt(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_mult	./src/core/functions.c	/^_op_mult(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_neq	./src/core/functions.c	/^_op_neq(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_or	./src/core/functions.c	/^_op_or(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_rshift	./src/core/functions.c	/^_op_rshift(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_sub	./src/core/functions.c	/^_op_sub(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
+_op_xor	./src/core/functions.c	/^_op_xor(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
 _print_lookahead	./src/core/interpret.c	/^_print_lookahead(Interpret *p_interpret) {$/;"	f	typeref:typename:void
 _proc_decl	./src/core/interpret.c	/^_proc_decl(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _process	./src/core/functions.c	/^_process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,$/;"	f	typeref:typename:void
 _product	./src/core/interpret.c	/^_product(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _product2	./src/core/interpret.c	/^_product2(Interpret *p_interpret) {$/;"	f	typeref:typename:int
 _program	./src/core/interpret.c	/^_program(Interpret *p_interpret) {$/;"	f	typeref:typename:int
+_resolve_composite_op	./src/core/functions.c	/^_resolve_composite_op(TokenType tt_op, TokenType tt_op2) {$/;"	f	typeref:typename:TokenType	file:
 _scanner_get_next_char	./src/core/scanner.c	/^_scanner_get_next_char(Scanner *p_scanner) {$/;"	f	typeref:typename:char
 _scanner_has_next_char	./src/core/scanner.c	/^_scanner_has_next_char(Scanner *p_scanner) {$/;"	f	typeref:typename:_Bool
 _scope_get_hash	./src/core/scope.c	/^_scope_get_hash(Scope *p_scope, char *c_key) {$/;"	f	typeref:typename:Hash *	file:
@@ -126,6 +172,7 @@ arrayiterator_delete	./src/data/array.c	/^arrayiterator_delete(ArrayIterator *p_
 arrayiterator_has_next	./src/data/array.c	/^arrayiterator_has_next(ArrayIterator *p_arrayiterator) {$/;"	f	typeref:typename:_Bool
 arrayiterator_new	./src/data/array.c	/^arrayiterator_new(Array *p_array) {$/;"	f	typeref:typename:ArrayIterator *
 arrayiterator_next	./src/data/array.c	/^arrayiterator_next(ArrayIterator *p_arrayiterator) {$/;"	f	typeref:typename:void *
+c_name	./src/core/functions.c	/^   const char *c_name;$/;"	m	struct:__anonc43baffb0108	typeref:typename:const char *	file:
 convert_function_arg_types_to_highest	./src/core/convert.c	/^convert_function_arg_types_to_highest(Stack *p_stack_args, int i_args) {$/;"	f	typeref:typename:TokenType
 convert_to_array	./src/core/convert.c	/^convert_to_array(Token *p_token) {$/;"	f	typeref:typename:void
 convert_to_double	./src/core/convert.c	/^convert_to_double(Token *p_token) {$/;"	f	typeref:typename:void
@@ -161,6 +208,7 @@ datiter_new	./src/data/dat.c	/^datiter_new(Dat *p_dat) {$/;"	f	typeref:typename:
 datiter_next	./src/data/dat.c	/^datiter_next(DatIter *p_iter) {$/;"	f	typeref:typename:void *
 datiter_next_t	./src/data/dat.c	/^datiter_next_t(DatIter *p_iter, TYPE *p_type) {$/;"	f	typeref:typename:void *
 datiter_skip	./src/data/dat.c	/^datiter_skip(DatIter *p_iter, unsigned i_num) {$/;"	f	typeref:typename:void
+fn	./src/core/functions.c	/^   BuiltinFn   fn;$/;"	m	struct:__anonc43baffb0108	typeref:typename:BuiltinFn	file:
 funcdef_delete	./src/core/symbol.c	/^funcdef_delete(FuncDef *p_funcdef) {$/;"	f	typeref:typename:void
 funcdef_new	./src/core/symbol.c	/^funcdef_new(List *p_body, List *p_params, int i_nparams) {$/;"	f	typeref:typename:FuncDef *
 function_delete	./src/core/function.c	/^function_delete(Function *p_function) {$/;"	f	typeref:typename:void
@@ -176,6 +224,7 @@ functions_new	./src/core/functions.c	/^functions_new() {$/;"	f	typeref:typename:
 fype_delete	./src/fype.c	/^fype_delete(Fype *p_fype) {$/;"	f	typeref:typename:void
 fype_new	./src/fype.c	/^fype_new() {$/;"	f	typeref:typename:Fype *
 fype_run	./src/fype.c	/^fype_run(int i_argc, char **pc_argv) {$/;"	f	typeref:typename:int
+g_builtins	./src/core/functions.c	/^static const BuiltinEntry g_builtins[] = {$/;"	v	typeref:typename:const BuiltinEntry[]	file:
 garbage_add	./src/core/garbage.c	/^garbage_add(void *p, GarbageType type) {$/;"	f	typeref:typename:void
 garbage_add2	./src/core/garbage.c	/^garbage_add2(void *p,$/;"	f	typeref:typename:void
 garbage_add3	./src/core/garbage.c	/^garbage_add3(void *p,$/;"	f	typeref:typename:void
@@ -346,7 +395,6 @@ token_new	./src/core/token.c	/^token_new(char *c_val, TokenType tt_cur, int i_li
 token_new_	./src/core/token.c	/^token_new_(char *c_val, TokenType tt_cur, char *c_filename) {$/;"	f	typeref:typename:Token *
 token_new_array	./src/core/token.c	/^token_new_array(int i_size) {$/;"	f	typeref:typename:Token *
 token_new_copy	./src/core/token.c	/^token_new_copy(Token *p_token) {$/;"	f	typeref:typename:Token *
-token_new_double	./src/core/token.c	/^token_new_double(double d_val) {$/;"	f	typeref:typename:Token *
 token_new_dummy	./src/core/token.c	/^token_new_dummy() {$/;"	f	typeref:typename:Token *
 token_new_integer	./src/core/token.c	/^token_new_integer(int i_val) {$/;"	f	typeref:typename:Token *
 token_new_string	./src/core/token.c	/^token_new_string(char *c_val) {$/;"	f	typeref:typename:Token *

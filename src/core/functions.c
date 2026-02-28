@@ -455,6 +455,475 @@ functions_delete(Functions *p_functions) {
 
 /* ─── Operator processing ────────────────────────────────────────────── */
 
+/* Resolve a two-token compound operator into its canonical single TokenType.
+ * For example, '!' + '=' becomes TT_NEQ, ':' + '<' becomes TT_LSHIFT.
+ * Returns tt_op unchanged when no compound match is found. */
+static TokenType
+_resolve_composite_op(TokenType tt_op, TokenType tt_op2) {
+   switch (tt_op) {
+   case TT_NOT:
+      if (tt_op2 == TT_ASSIGN) return (TT_NEQ);
+      break;
+   case TT_ASSIGN:
+      if (tt_op2 == TT_ASSIGN) return (TT_EQ);
+      break;
+   case TT_LT:
+      if (tt_op2 == TT_ASSIGN) return (TT_LE);
+      break;
+   case TT_GT:
+      if (tt_op2 == TT_ASSIGN) return (TT_GE);
+      break;
+   case TT_DDOT:
+      if (tt_op2 == TT_LT) return (TT_LSHIFT);
+      if (tt_op2 == TT_GT) return (TT_RSHIFT);
+      break;
+   default:
+      break;
+   }
+   return (tt_op);
+}
+
+/* Perform variable or array-element assignment.
+ * If p_interpret->p_token_array_lhs is set, writes into that array slot;
+ * otherwise writes into the named variable in p_interpret->p_token_temp. */
+static void
+_op_assign(Interpret *p_interpret, Token *p_token_store) {
+   /* Array element assignment: arr[i] = val */
+   if (p_interpret->p_token_array_lhs != NULL) {
+      array_set(p_interpret->p_token_array_lhs->p_array,
+                p_interpret->i_array_lhs_index,
+                p_token_store);
+      p_interpret->p_token_array_lhs = NULL;
+      return;
+   }
+
+   /* Regular variable assignment */
+   Token *p_token_assign = p_interpret->p_token_temp;
+   TokenType tt_assign = token_get_tt(p_token_assign);
+
+   if (tt_assign != TT_IDENT) {
+      _FUNCTIONS_ERROR("Can only assign to symbols", p_token_store);
+   }
+
+   Symbol *p_symbol = scope_get(p_interpret->p_scope,
+                                token_get_val(p_token_assign));
+
+   if (p_symbol == NULL) {
+      _FUNCTIONS_ERROR("No such symbol", p_token_assign);
+   }
+
+   symbol_set_val(p_symbol, p_token_store);
+   symbol_set_sym(p_symbol, SYM_VARIABLE);
+}
+
+/* Addition: store = next + store (integers, doubles, strings, array append) */
+static void
+_op_add(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     token_get_ival(p_next) + token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_store,
+                     token_get_dval(p_next) + token_get_dval(p_store));
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) +
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      array_append(p_store->p_array, p_next->p_array);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Subtraction: store = next - store */
+static void
+_op_sub(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     token_get_ival(p_next) - token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_store,
+                     token_get_dval(p_next) - token_get_dval(p_store));
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) -
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY - TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Multiplication: store = next * store */
+static void
+_op_mult(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     token_get_ival(p_next) * token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_store,
+                     token_get_dval(p_next) * token_get_dval(p_store));
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) *
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY * TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Division: store = next / store */
+static void
+_op_div(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) /
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_store,
+                     token_get_dval(p_next) / token_get_dval(p_store));
+      break;
+   case TT_STRING:
+      token_set_dval(p_store,
+                     atof(token_get_val(p_next)) /
+                     atof(token_get_val(p_store)));
+      token_set_tt(p_store, TT_DOUBLE);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY / TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Equality: store = (next == store) — result is always TT_INTEGER */
+static void
+_op_eq(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) ==
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) == token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) == 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY eq TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Inequality: store = (next != store) — result is always TT_INTEGER */
+static void
+_op_neq(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) !=
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) != token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) != 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY != TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Less-than: store = (next < store) — result is always TT_INTEGER */
+static void
+_op_lt(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) <
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) < token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) < 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY < TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Greater-than: store = (next > store) — result is always TT_INTEGER */
+static void
+_op_gt(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) >
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) > token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) > 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY > TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Less-or-equal: store = (next <= store) — result is always TT_INTEGER */
+static void
+_op_le(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) <=
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) <= token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) <= 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY <= TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Greater-or-equal: store = (next >= store) — result is always TT_INTEGER */
+static void
+_op_ge(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) >=
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     token_get_dval(p_next) >= token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     strcmp(token_get_val(p_next),
+                            token_get_val(p_store)) >= 0);
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY >= TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Bitwise AND: store = next & store — doubles and strings coerced to int */
+static void
+_op_and(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) &
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     (int) token_get_dval(p_next) &
+                     (int) token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) &
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY & TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Bitwise OR: store = next | store — doubles and strings coerced to int */
+static void
+_op_or(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) |
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     (int) token_get_dval(p_next) |
+                     (int) token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) |
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY | TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Bitwise XOR: store = next ^ store — doubles and strings coerced to int */
+static void
+_op_xor(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) ^
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     (int) token_get_dval(p_next) ^
+                     (int) token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) ^
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY ^ TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Left shift: store = next << store — doubles and strings coerced to int */
+static void
+_op_lshift(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) <<
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     (int) token_get_dval(p_next) <<
+                     (int) token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) <<
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY << TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Right shift: store = next >> store — doubles and strings coerced to int */
+static void
+_op_rshift(Token *p_store, Token *p_next, TokenType tt_highest) {
+   switch (tt_highest) {
+   case TT_INTEGER:
+      token_set_ival(p_store,
+                     (int) token_get_ival(p_next) >>
+                     token_get_ival(p_store));
+      break;
+   case TT_DOUBLE:
+      token_set_ival(p_store,
+                     (int) token_get_dval(p_next) >>
+                     (int) token_get_dval(p_store));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_STRING:
+      token_set_ival(p_store,
+                     atoi(token_get_val(p_next)) >>
+                     atoi(token_get_val(p_store)));
+      token_set_tt(p_store, TT_INTEGER);
+      break;
+   case TT_ARRAY:
+      ERROR("TT_ARRAY >> TT_ARRAY not yet implemented");
+      break;
+      NO_DEFAULT;
+   }
+}
+
+/* Dispatch to the correct per-operator handler.
+ * 1. Resolve composite two-token operators (!=, ==, <=, >=, <<, >>).
+ * 2. Handle assignment early — it does not need type conversion.
+ * 3. Coerce both operands to their highest shared type.
+ * 4. Call the matching _op_*() function for the resolved operator. */
 void
 _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
          Token *p_token_op2, Token *p_token_next) {
@@ -466,10 +935,11 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
 
 #ifdef DEBUG_FUNCTION_PROCESS
    if (p_token_op2 == NULL)
-      printf("DEBUG::FUNCTION::PROCESS: Operator %s\n", tt_get_name(tt_op));
+      printf("DEBUG::FUNCTION::PROCESS: Operator %s\n",
+             tt_get_name(tt_op));
    else
-      printf("DEBUG::FUNCTION::PROCESS: Operator %s %s\n", tt_get_name(tt_op),
-             tt_get_name(tt_op2));
+      printf("DEBUG::FUNCTION::PROCESS: Operator %s %s\n",
+             tt_get_name(tt_op), tt_get_name(tt_op2));
 
    token_print(p_token_next);
    printf("\n");
@@ -477,98 +947,14 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
    printf("\n");
 #endif /* DEBUG_FUNCTION_PROCESS */
 
-   if (p_token_op2 != NULL) {
-      switch (tt_op) {
-      case TT_NOT:
-         switch (tt_op2) {
-         case TT_ASSIGN:
-            tt_op = TT_NEQ;
-            break;
-         default:
-            break;
-         }
-         break;
-      case TT_ASSIGN:
-         switch (tt_op2) {
-         case TT_ASSIGN:
-            tt_op = TT_EQ;
-            break;
-         default:
-            break;
-         }
-         break;
-      case TT_LT:
-         switch (tt_op2) {
-         case TT_ASSIGN:
-            tt_op = TT_LE;
-            break;
-         default:
-            break;
-         }
-         break;
-      case TT_GT:
-         switch (tt_op2) {
-         case TT_ASSIGN:
-            tt_op = TT_GE;
-            break;
-         default:
-            break;
-         }
-         break;
-      case TT_DDOT:
-         switch (tt_op2) {
-         case TT_LT:
-            tt_op = TT_LSHIFT;
-            break;
-         case TT_GT:
-            tt_op = TT_RSHIFT;
-            break;
-         default:
-            break;
-         }
-         break;
-      default:
-         break;
-      }
-   } else {
-      switch (tt_op) {
-      case TT_ASSIGN:
-      {
-         /* Array element assignment: arr[i] = val */
-         if (p_interpret->p_token_array_lhs != NULL) {
-            array_set(p_interpret->p_token_array_lhs->p_array,
-                      p_interpret->i_array_lhs_index,
-                      p_token_store);
-            p_interpret->p_token_array_lhs = NULL;
-            return;
-         }
-
-         /* Regular variable assignment */
-         Token *p_token_assign = p_interpret->p_token_temp;
-         TokenType tt_assign = token_get_tt(p_token_assign);
-
-         if (tt_assign != TT_IDENT) {
-            _FUNCTIONS_ERROR("Can only assign to symbols",
-                             p_token_store);
-         }
-
-         Symbol *p_symbol = scope_get(p_interpret->p_scope,
-                                      token_get_val(p_token_assign));
-
-         if (p_symbol == NULL) {
-            _FUNCTIONS_ERROR("No such symbol",
-                             p_token_assign);
-         }
-
-         symbol_set_val(p_symbol, p_token_store);
-         symbol_set_sym(p_symbol, SYM_VARIABLE);
-
-         return;
-      }
-
-      break;
-      NO_DEFAULT;
-      }
+   /* Resolve two-token operators (!=, ==, <=, >=, <<, >>).
+    * When p_token_op2 is NULL and operator is TT_ASSIGN, handle assignment
+    * directly — it does not need type conversion and must not fall through. */
+   if (p_token_op2 != NULL)
+      tt_op = _resolve_composite_op(tt_op, tt_op2);
+   else if (tt_op == TT_ASSIGN) {
+      _op_assign(p_interpret, p_token_store);
+      return;
    }
 
    p_token_next = token_new_copy(p_token_next);
@@ -576,385 +962,26 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
 
 #ifdef DEBUG_FUNCTION_PROCESS
    printf("DEBUG::FUNCTION::PROCESS: ===> %s %s %s\n",
-          tt_get_name(tt_highest),
-          tt_get_name(tt_op),
+          tt_get_name(tt_highest), tt_get_name(tt_op),
           tt_get_name(tt_highest));
 #endif /* DEBUG_FUNCTION_PROCESS */
 
    switch (tt_op) {
-   case TT_ADD:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        token_get_ival(p_token_next) +
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token_store,
-                        token_get_dval(p_token_next) +
-                        token_get_dval(p_token_store));
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) +
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         array_append(p_token_store->p_array,
-                      p_token_next->p_array);
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_SUB:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        token_get_ival(p_token_next) -
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token_store,
-                        token_get_dval(p_token_next) -
-                        token_get_dval(p_token_store));
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) -
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("TT_ARRAY - TT_ARRAY not yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_MULT:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        token_get_ival(p_token_next) *
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token_store,
-                        token_get_dval(p_token_next) *
-                        token_get_dval(p_token_store));
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) *
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("TT_ARRAY * TT_ARRAY not yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_DIV:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) /
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token_store,
-                        token_get_dval(p_token_next) /
-                        token_get_dval(p_token_store));
-         break;
-      case TT_STRING:
-         token_set_dval(p_token_store,
-                        atof(token_get_val(p_token_next)) /
-                        atof(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_DOUBLE);
-         break;
-      case TT_ARRAY:
-         ERROR("TT_ARRAY / TT_ARRAY not yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_EQ:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) ==
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) ==
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) == 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("TT_ARRAY eq TT_ARRAY not yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_NEQ:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) !=
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) !=
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) != 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_LE:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) <=
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) <=
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) <= 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_GE:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) >=
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) >=
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) >= 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_LT:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) <
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) <
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) < 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_GT:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) >
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        token_get_dval(p_token_next) >
-                        token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        strcmp(token_get_val(p_token_next),
-                               token_get_val(p_token_store)) > 0);
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_AND:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) &
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        (int) token_get_dval(p_token_next) &
-                        (int) token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) &
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_OR:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) |
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        (int) token_get_dval(p_token_next) |
-                        (int) token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) |
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_XOR:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) ^
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        (int) token_get_dval(p_token_next) ^
-                        (int) token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) ^
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_LSHIFT:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) <<
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        (int) token_get_dval(p_token_next) <<
-                        (int) token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) <<
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-   case TT_RSHIFT:
-      switch (tt_highest) {
-      case TT_INTEGER:
-         token_set_ival(p_token_store,
-                        (int) token_get_ival(p_token_next) >>
-                        token_get_ival(p_token_store));
-         break;
-      case TT_DOUBLE:
-         token_set_ival(p_token_store,
-                        (int) token_get_dval(p_token_next) >>
-                        (int) token_get_dval(p_token_store));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_STRING:
-         token_set_ival(p_token_store,
-                        atoi(token_get_val(p_token_next)) >>
-                        atoi(token_get_val(p_token_store)));
-         token_set_tt(p_token_store, TT_INTEGER);
-         break;
-      case TT_ARRAY:
-         ERROR("ARRAY bla yet implemented");
-         break;
-         NO_DEFAULT;
-      }
-      break;
-
+   case TT_ADD:    _op_add(p_token_store, p_token_next, tt_highest);    break;
+   case TT_SUB:    _op_sub(p_token_store, p_token_next, tt_highest);    break;
+   case TT_MULT:   _op_mult(p_token_store, p_token_next, tt_highest);   break;
+   case TT_DIV:    _op_div(p_token_store, p_token_next, tt_highest);    break;
+   case TT_EQ:     _op_eq(p_token_store, p_token_next, tt_highest);     break;
+   case TT_NEQ:    _op_neq(p_token_store, p_token_next, tt_highest);    break;
+   case TT_LT:     _op_lt(p_token_store, p_token_next, tt_highest);     break;
+   case TT_GT:     _op_gt(p_token_store, p_token_next, tt_highest);     break;
+   case TT_LE:     _op_le(p_token_store, p_token_next, tt_highest);     break;
+   case TT_GE:     _op_ge(p_token_store, p_token_next, tt_highest);     break;
+   case TT_AND:    _op_and(p_token_store, p_token_next, tt_highest);    break;
+   case TT_OR:     _op_or(p_token_store, p_token_next, tt_highest);     break;
+   case TT_XOR:    _op_xor(p_token_store, p_token_next, tt_highest);    break;
+   case TT_LSHIFT: _op_lshift(p_token_store, p_token_next, tt_highest); break;
+   case TT_RSHIFT: _op_rshift(p_token_store, p_token_next, tt_highest); break;
    default:
       _FUNCTIONS_ERROR("No such function/operator", p_token_op);
    }

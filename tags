@@ -102,7 +102,7 @@ _next	./src/core/interpret.c	/^_next(Interpret *p_interpret) {$/;"	f	typeref:typ
 _next_tt	./src/core/interpret.c	/^_next_tt(Interpret *p_interpret) {$/;"	f	typeref:typename:TokenType
 _op_add	./src/core/functions.c	/^_op_add(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
 _op_and	./src/core/functions.c	/^_op_and(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
-_op_assign	./src/core/functions.c	/^_op_assign(Interpret *p_interpret, Token *p_token_store) {$/;"	f	typeref:typename:void	file:
+_op_assign	./src/core/functions.c	/^_op_assign(Interpret *p_interpret, Token *p_token_store,$/;"	f	typeref:typename:void	file:
 _op_div	./src/core/functions.c	/^_op_div(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
 _op_eq	./src/core/functions.c	/^_op_eq(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:
 _op_ge	./src/core/functions.c	/^_op_ge(Token *p_store, Token *p_next, TokenType tt_highest) {$/;"	f	typeref:typename:void	file:

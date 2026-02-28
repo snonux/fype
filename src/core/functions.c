@@ -486,14 +486,16 @@ _resolve_composite_op(TokenType tt_op, TokenType tt_op2) {
 /* Perform variable or array-element assignment.
  * If p_interpret->p_token_array_lhs is set, writes into that array slot;
  * otherwise writes into the named variable in p_interpret->p_token_temp. */
+/* Perform variable or array-element assignment.
+ * p_array_lhs and i_lhs_idx are passed explicitly so this function does
+ * not need to reach into the Interpret struct for array-LHS state. */
 static void
-_op_assign(Interpret *p_interpret, Token *p_token_store) {
+_op_assign(Interpret *p_interpret, Token *p_token_store,
+           Token *p_array_lhs, int i_lhs_idx) {
+
    /* Array element assignment: arr[i] = val */
-   if (p_interpret->p_token_array_lhs != NULL) {
-      array_set(p_interpret->p_token_array_lhs->p_array,
-                p_interpret->i_array_lhs_index,
-                p_token_store);
-      p_interpret->p_token_array_lhs = NULL;
+   if (p_array_lhs != NULL) {
+      array_set(p_array_lhs->p_array, i_lhs_idx, p_token_store);
       return;
    }
 
@@ -924,9 +926,18 @@ _op_rshift(Token *p_store, Token *p_next, TokenType tt_highest) {
  * 2. Handle assignment early — it does not need type conversion.
  * 3. Coerce both operands to their highest shared type.
  * 4. Call the matching _op_*() function for the resolved operator. */
+/* Dispatch to the correct per-operator handler.
+ * p_array_lhs / i_lhs_idx carry array-element assignment context when
+ * the LHS is arr[i]; both are NULL/0 for plain variable assignment or
+ * any non-assignment operator.
+ * 1. Resolve composite two-token operators (!=, ==, <=, >=, <<, >>).
+ * 2. Handle assignment early — it does not need type conversion.
+ * 3. Coerce both operands to their highest shared type.
+ * 4. Call the matching _op_*() function for the resolved operator. */
 void
 _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
-         Token *p_token_op2, Token *p_token_next) {
+         Token *p_token_op2, Token *p_token_next,
+         Token *p_array_lhs, int i_lhs_idx) {
 
    TokenType tt_op = token_get_tt(p_token_op);
    TokenType tt_op2 = p_token_op2 == NULL
@@ -953,7 +964,7 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
    if (p_token_op2 != NULL)
       tt_op = _resolve_composite_op(tt_op, tt_op2);
    else if (tt_op == TT_ASSIGN) {
-      _op_assign(p_interpret, p_token_store);
+      _op_assign(p_interpret, p_token_store, p_array_lhs, i_lhs_idx);
       return;
    }
 
@@ -994,17 +1005,22 @@ _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
    token_delete(p_token_next);
 }
 
+/* Drive p_stack_args through the given operator, consuming i_args operands.
+ * p_array_lhs / i_lhs_idx are forwarded to _process() so that array-element
+ * assignment (arr[i] = val) can be dispatched without touching Interpret
+ * internals.  Pass NULL / 0 for normal (non-array-LHS) expressions. */
 void
 function_process(Interpret *p_interpret, Token *p_token_op,
-                 Token *p_token_op2, Stack *p_stack_args, int i_args) {
+                 Token *p_token_op2, Stack *p_stack_args, int i_args,
+                 Token *p_array_lhs, int i_lhs_idx) {
 
    Token *p_token_store = token_new_copy(stack_pop(p_stack_args));
 
-   for (int i = 0; i < i_args -1 && !stack_empty(p_stack_args); ++i) {
+   for (int i = 0; i < i_args - 1 && !stack_empty(p_stack_args); ++i) {
       Token *p_token_next = stack_pop(p_stack_args);
 
       _process(p_interpret, p_token_store, p_token_op,
-               p_token_op2, p_token_next);
+               p_token_op2, p_token_next, p_array_lhs, i_lhs_idx);
    }
 
    stack_push(p_stack_args, p_token_store);

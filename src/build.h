@@ -36,7 +36,7 @@
 #ifndef BUILD_H
 #define BUILD_H
 
-#define BUILDNR 9696
+#define BUILDNR 9698
 #define OS_LINUX
 
 #endif

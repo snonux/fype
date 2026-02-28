@@ -818,7 +818,7 @@ _compare(Interpret *p_interpret) {
                _INTERPRET_ERROR("Expected sum", p_interpret->p_token);
 
             function_process(p_interpret, p_token_op, p_token_op2,
-                             p_interpret->p_stack, 2);
+                             p_interpret->p_stack, 2, NULL, 0);
          }
          break; /* case */
 
@@ -875,7 +875,7 @@ _sum(Interpret *p_interpret) {
                _INTERPRET_ERROR("Expected product", p_token_op);
 
             function_process(p_interpret, p_token_op, p_token_op2,
-                             p_interpret->p_stack, 2);
+                             p_interpret->p_stack, 2, NULL, 0);
 
          }
          break; /* case */
@@ -913,7 +913,7 @@ _product(Interpret *p_interpret) {
                _INTERPRET_ERROR("Expected product2", p_token);
 
             function_process(p_interpret, p_token, NULL,
-                             p_interpret->p_stack, 2);
+                             p_interpret->p_stack, 2, NULL, 0);
 
          }
          break; /* case */
@@ -955,12 +955,10 @@ _product2(Interpret *p_interpret) {
             if (!_expression_(p_interpret))
                _INTERPRET_ERROR("Expected expression", p_token);
 
-            /* Restore array LHS so function_process can assign it */
-            p_interpret->p_token_array_lhs = p_lhs;
-            p_interpret->i_array_lhs_index = i_lhs_idx;
+            /* Pass array LHS explicitly; no longer stored in p_interpret */
             p_interpret->p_token_temp = p_token_temp;
             function_process(p_interpret, p_token, NULL,
-                             p_interpret->p_stack, 2);
+                             p_interpret->p_stack, 2, p_lhs, i_lhs_idx);
             p_interpret->p_token_temp = NULL;
 
          } else {

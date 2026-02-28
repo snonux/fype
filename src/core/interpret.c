@@ -62,6 +62,11 @@ int _block_get(Interpret *p_interpret, List *p_list_block);
 int _block_skip(Interpret *p_interpret);
 int _compare(Interpret *p_interpret);
 int _control(Interpret *p_interpret);
+static Token* _eval_expr_list(Interpret *p_interpret, List *p_list_expr);
+static int _control_if_ifnot(Interpret *p_interpret);
+static int _control_while_until(Interpret *p_interpret);
+static int _control_loop(Interpret *p_interpret);
+static int _control_do(Interpret *p_interpret);
 int _expression(Interpret *p_interpret);
 int _expression_(Interpret *p_interpret);
 int _expression_get(Interpret *p_interpret, List *p_list_block);
@@ -519,16 +524,228 @@ _expression_(Interpret *p_interpret) {
    return (_compare(p_interpret));
 }
 
+/* ─── Helper: evaluate an expression list with an isolated stack/iter ── */
+
+/* Evaluates p_list_expr in a temporary stack+iterator context so that
+ * the condition result does not pollute the caller's stack.  Returns the
+ * top-of-stack token after evaluation, or NULL if the expression is empty.
+ * The outer stack is fully restored before returning, so interpret_subprocess
+ * calls that follow use the correct (outer) stack directly — no extra
+ * stack_merge is required for CONTROL_RET handling. */
+static Token*
+_eval_expr_list(Interpret *p_interpret, List *p_list_expr) {
+   Stack        *p_stack_backup = p_interpret->p_stack;
+   ListIterator *p_iter_backup  = p_interpret->p_iter;
+
+   p_interpret->p_stack = stack_new();
+   p_interpret->p_iter  = listiterator_new(p_list_expr);
+   _next(p_interpret);   /* advance to first token in the expression list */
+
+   Token *p_token_top = NULL;
+   if (_expression_(p_interpret))
+      p_token_top = stack_pop(p_interpret->p_stack);
+
+   listiterator_delete(p_interpret->p_iter);
+   p_interpret->p_iter = p_iter_backup;
+   stack_delete(p_interpret->p_stack);
+   p_interpret->p_stack = p_stack_backup;
+
+   return (p_token_top);
+}
+
+/* ─── Per-control-flow handler functions ────────────────────────────── */
+
+/* Handle if / ifnot: evaluate the condition, execute the block when the
+ * condition is true (if) or false (ifnot). */
+static int
+_control_if_ifnot(Interpret *p_interpret) {
+   TokenType tt      = p_interpret->tt;
+   Token *p_token    = p_interpret->p_token;
+   _NEXT
+
+   if (!_expression_(p_interpret))
+      _INTERPRET_ERROR("Expected expression after if/ifnot", p_token);
+
+   Token *p_token_top  = stack_pop(p_interpret->p_stack);
+   List  *p_list_block = list_new();
+   _block_get(p_interpret, p_list_block);
+
+   _Bool b_run = (tt == TT_IF)
+                 ? convert_to_integer_get(p_token_top)
+                 : !convert_to_integer_get(p_token_top);
+
+   if (b_run) {
+      scope_up(p_interpret->p_scope);
+      interpret_subprocess(p_interpret, p_list_block);
+      scope_down(p_interpret->p_scope);
+   }
+
+   list_delete(p_list_block);
+   return (1);
+}
+
+/* Handle while / until: evaluate condition before each iteration; run body
+ * while condition is true (while) or false (until).
+ * _eval_expr_list restores the outer stack before the body runs, so
+ * interpret_subprocess places return values directly on the outer stack —
+ * no extra stack_merge is needed for CONTROL_RET. */
+static int
+_control_while_until(Interpret *p_interpret) {
+   TokenType tt   = p_interpret->tt;
+   Token *p_token = p_interpret->p_token;
+   List *p_list_expr  = list_new();
+   List *p_list_block = list_new();
+   _Bool b_flag = true;
+
+   _NEXT
+   _expression_get(p_interpret, p_list_expr);
+   _block_get(p_interpret, p_list_block);
+   Token *p_token_backup = p_interpret->p_token;
+
+   do {
+      Token *p_token_top = _eval_expr_list(p_interpret, p_list_expr);
+      if (p_token_top == NULL)
+         _INTERPRET_ERROR("Expected expression after while/until", p_token);
+
+      _Bool b_cond = (tt == TT_WHILE)
+                     ? convert_to_integer_get(p_token_top)
+                     : !convert_to_integer_get(p_token_top);
+
+      if (b_cond) {
+         scope_up(p_interpret->p_scope);
+         interpret_subprocess(p_interpret, p_list_block);
+         scope_down(p_interpret->p_scope);
+      } else {
+         b_flag = false;
+      }
+
+      /* Act on break/next/ret from the body.  break and ret stop the loop;
+       * next clears the flag and re-evaluates the condition on the next
+       * iteration; ret propagates upward without clearing the flag. */
+      if (p_interpret->ct == CONTROL_BREAK) {
+         p_interpret->ct = CONTROL_NONE;
+         b_flag = false;
+      } else if (p_interpret->ct == CONTROL_NEXT) {
+         p_interpret->ct = CONTROL_NONE;
+      } else if (p_interpret->ct == CONTROL_RET) {
+         b_flag = false;
+      }
+
+   } while (b_flag);
+
+   list_delete(p_list_expr);
+   list_delete(p_list_block);
+   p_interpret->p_token = p_token_backup;
+   p_interpret->tt = token_get_tt(p_token_backup);
+   return (1);
+}
+
+/* Handle loop: run body indefinitely; break or ret are the only exits. */
+static int
+_control_loop(Interpret *p_interpret) {
+   List *p_list_block = list_new();
+   _NEXT
+   _block_get(p_interpret, p_list_block);
+   Token *p_token_backup = p_interpret->p_token;
+
+   for (;;) {
+      scope_up(p_interpret->p_scope);
+      interpret_subprocess(p_interpret, p_list_block);
+      scope_down(p_interpret->p_scope);
+
+      if (p_interpret->ct == CONTROL_BREAK) {
+         p_interpret->ct = CONTROL_NONE;
+         break;
+      } else if (p_interpret->ct == CONTROL_NEXT) {
+         p_interpret->ct = CONTROL_NONE;
+         /* next: restart loop body from the top */
+      } else if (p_interpret->ct == CONTROL_RET) {
+         /* Propagate ret upward; return values are already on the stack. */
+         break;
+      }
+   }
+
+   list_delete(p_list_block);
+   p_interpret->p_token = p_token_backup;
+   p_interpret->tt = token_get_tt(p_token_backup);
+   return (1);
+}
+
+/* Handle do...while/until: body runs at least once; condition is evaluated
+ * at the bottom of each iteration using _eval_expr_list (isolated stack). */
+static int
+_control_do(Interpret *p_interpret) {
+   List *p_list_block = list_new();
+   List *p_list_expr  = list_new();
+
+   _NEXT
+   _block_get(p_interpret, p_list_block); /* leaves cursor at 'while'/'until' */
+
+   Token *p_token = p_interpret->p_token;
+   TokenType tt   = p_interpret->tt;
+   if (tt != TT_WHILE && tt != TT_UNTIL)
+      _INTERPRET_ERROR(
+         "Expected 'while' or 'until' after 'do' block", p_token);
+
+   _NEXT   /* past 'while' or 'until' */
+
+   /* Collect condition tokens up to ';' (no block follows the condition) */
+   while (p_interpret->tt != TT_SEMICOLON && p_interpret->tt != TT_NONE) {
+      list_add_back(p_list_expr, p_interpret->p_token);
+      _NEXT
+   }
+   _NEXT   /* past ';' */
+   Token *p_token_backup = p_interpret->p_token;
+
+   _Bool b_flag = true;
+   do {
+      scope_up(p_interpret->p_scope);
+      interpret_subprocess(p_interpret, p_list_block);
+      scope_down(p_interpret->p_scope);
+
+      /* Handle break/next/ret before re-evaluating the condition.
+       * For ret: stop the loop; skip condition eval via continue to avoid
+       * corrupting the stack with extra condition results. */
+      if (p_interpret->ct == CONTROL_BREAK) {
+         p_interpret->ct = CONTROL_NONE;
+         b_flag = false;
+         continue;
+      } else if (p_interpret->ct == CONTROL_NEXT) {
+         p_interpret->ct = CONTROL_NONE;
+         /* fall through to condition re-eval */
+      } else if (p_interpret->ct == CONTROL_RET) {
+         b_flag = false;
+         continue;
+      }
+
+      Token *p_token_top = _eval_expr_list(p_interpret, p_list_expr);
+      if (p_token_top != NULL) {
+         int i_val = convert_to_integer_get(p_token_top);
+         b_flag = (tt == TT_WHILE) ? (i_val != 0) : (i_val == 0);
+      }
+
+   } while (b_flag);
+
+   list_delete(p_list_block);
+   list_delete(p_list_expr);
+   p_interpret->p_token = p_token_backup;
+   p_interpret->tt = token_get_tt(p_token_backup);
+   return (1);
+}
+
+/* ─── Main control dispatcher ────────────────────────────────────── */
+
+/* Dispatch to the appropriate per-control-flow handler based on the
+ * current token type.  Short constructs (ret, break, next) are handled
+ * inline; all loop/conditional forms delegate to their own functions. */
 int
 _control(Interpret *p_interpret) {
    _CHECK TRACK
 
-   Token *p_token = p_interpret->p_token;
-
    switch (p_interpret->tt) {
-   /* ret;       — no return value (stack unchanged after clearing intermediates)
-    * ret expr;  — single return value pushed to stack
-    * ret a, b;  — multiple return values; all pushed left-to-right */
+   /* ret;       — clear stack, evaluate optional comma-list of return exprs */
+   /* ret expr;  — single return value on the stack                         */
+   /* ret a, b;  — multiple return values, left-to-right                    */
    case TT_RET:
       _NEXT   /* past 'ret' */
       /* Clear any intermediate values accumulated during the function body
@@ -538,263 +755,30 @@ _control(Interpret *p_interpret) {
              && p_interpret->tt != TT_NONE) {
          _expression_(p_interpret);
          if (p_interpret->tt == TT_COMMA)
-            _NEXT   /* past ',' between multiple return values */
+            _NEXT   /* past ',' between return values */
       }
       p_interpret->ct = CONTROL_RET;
       return (1);
-   /* break; — set the break flag; the statement loop in _program() will
-    * stop and the flag propagates up to the enclosing while/until. */
+   /* break; — signal the enclosing loop to stop after the current body */
    case TT_BREAK:
       p_interpret->ct = CONTROL_BREAK;
       _NEXT
       return (1);
-   /* next; — set the next flag to skip the rest of the loop body and
-    * let the loop re-evaluate its condition on the next iteration. */
+   /* next; — skip the rest of the body and re-evaluate the loop condition */
    case TT_NEXT:
       p_interpret->ct = CONTROL_NEXT;
       _NEXT
       return (1);
    case TT_IF:
    case TT_IFNOT:
-   {
-      TokenType tt = p_interpret->tt;
-      _NEXT
-      if (_expression_(p_interpret)) {
-         Token *p_token_top = stack_pop(p_interpret->p_stack);
-         List *p_list_block = list_new();
-         _block_get(p_interpret, p_list_block);
-         int ret = 0;
-
-         switch (tt) {
-         case TT_IF:
-            if (convert_to_integer_get(p_token_top)) {
-               scope_up(p_interpret->p_scope);
-               ret = interpret_subprocess(p_interpret, p_list_block);
-               scope_down(p_interpret->p_scope);
-            }
-            break;
-         case TT_IFNOT:
-            if (!convert_to_integer_get(p_token_top)) {
-               scope_up(p_interpret->p_scope);
-               ret = interpret_subprocess(p_interpret, p_list_block);
-               scope_down(p_interpret->p_scope);
-            }
-            break;
-            NO_DEFAULT;
-         }
-
-         list_delete(p_list_block);
-         return (1);
-
-      } else {
-         _INTERPRET_ERROR("Expected expression after control keyword", p_token);
-      }
-   }
-   break;
+      return (_control_if_ifnot(p_interpret));
    case TT_WHILE:
    case TT_UNTIL:
-   {
-      TokenType tt = p_interpret->tt;
-      List *p_list_expr = list_new(), *p_list_block = list_new();
-      _Bool b_flag = true;
-
-      _NEXT
-
-      _expression_get(p_interpret, p_list_expr);
-      _block_get(p_interpret, p_list_block);
-      Token *p_token_backup = p_interpret->p_token;
-
-      do {
-         Stack *p_stack_backup = p_interpret->p_stack;
-         p_interpret->p_stack = stack_new();
-
-         ListIterator *p_iter_backup = p_interpret->p_iter;
-         p_interpret->p_iter = listiterator_new(p_list_expr);
-
-         _NEXT
-
-         /* Dont use if here, because we want to check the p_itnerpret->ct */
-         if (_expression_(p_interpret)) {
-            Token *p_token_top = stack_pop(p_interpret->p_stack);
-
-            if (p_token_top == NULL) {
-               printf("FOO\n");
-               exit(0);
-            }
-            if (tt ==  TT_WHILE) {
-               if (convert_to_integer_get(p_token_top)) {
-                  scope_up(p_interpret->p_scope);
-                  interpret_subprocess(p_interpret, p_list_block);
-                  scope_down(p_interpret->p_scope);
-
-               } else {
-                  b_flag = false;
-               }
-
-            } else if (tt == TT_UNTIL) {
-               if (!convert_to_integer_get(p_token_top)) {
-                  scope_up(p_interpret->p_scope);
-                  interpret_subprocess(p_interpret, p_list_block);
-                  scope_down(p_interpret->p_scope);
-
-               } else {
-                  b_flag = false;
-               }
-            }
-
-            /* Act on any break/next/ret flag set during loop body execution.
-             * break clears the flag and stops iteration; next clears it
-             * and lets the loop re-evaluate the condition naturally.
-             * ret does not clear the flag so it propagates to the caller;
-             * the return value is rescued from cond_stack to p_stack_backup
-             * before the cond_stack is deleted below. */
-            if (p_interpret->ct == CONTROL_BREAK) {
-               p_interpret->ct = CONTROL_NONE;
-               b_flag = false;
-            } else if (p_interpret->ct == CONTROL_NEXT) {
-               p_interpret->ct = CONTROL_NONE;
-               /* b_flag stays true; condition re-evaluated next iteration */
-            } else if (p_interpret->ct == CONTROL_RET) {
-               /* Rescue any return values from cond_stack into the outer
-                * stack before cond_stack is destroyed at the end of the
-                * do-while iteration. */
-               stack_merge(p_stack_backup, p_interpret->p_stack);
-               b_flag = false;
-            }
-
-         } else {
-            _INTERPRET_ERROR("Expected expression after control keyword",
-                             p_token);
-         }
-
-         listiterator_delete(p_interpret->p_iter);
-         p_interpret->p_iter = p_iter_backup;
-
-         stack_delete(p_interpret->p_stack);
-         p_interpret->p_stack = p_stack_backup;
-
-      } while (b_flag);
-
-      list_delete(p_list_expr);
-      list_delete(p_list_block);
-      p_interpret->p_token = p_token_backup;
-      p_interpret->tt = token_get_tt(p_token_backup);
-
-      return (1);
-   }
-   break;
+      return (_control_while_until(p_interpret));
    case TT_LOOP:
-   {
-      List *p_list_block = list_new();
-      _NEXT
-      _block_get(p_interpret, p_list_block);
-      Token *p_token_backup = p_interpret->p_token;
-
-      /* Run forever; break is the only exit, next restarts the body */
-      for (;;) {
-         scope_up(p_interpret->p_scope);
-         interpret_subprocess(p_interpret, p_list_block);
-         scope_down(p_interpret->p_scope);
-
-         if (p_interpret->ct == CONTROL_BREAK) {
-            p_interpret->ct = CONTROL_NONE;
-            break;
-         } else if (p_interpret->ct == CONTROL_NEXT) {
-            p_interpret->ct = CONTROL_NONE;
-            /* skip the rest of the body; re-run from the top */
-         } else if (p_interpret->ct == CONTROL_RET) {
-            /* ret inside loop: propagate CONTROL_RET up to the enclosing
-             * function without clearing it; return values are on the stack. */
-            break;
-         }
-      }
-
-      list_delete(p_list_block);
-      p_interpret->p_token = p_token_backup;
-      p_interpret->tt = token_get_tt(p_token_backup);
-      return (1);
-   }
-   break;
+      return (_control_loop(p_interpret));
    case TT_DO:
-   {
-      /* do { body } while expr;  or  do { body } until expr;
-       * The body always executes at least once; the condition is evaluated
-       * at the bottom of each iteration (post-condition loop). */
-      List *p_list_block = list_new();
-      List *p_list_expr  = list_new();
-
-      _NEXT
-      _block_get(p_interpret, p_list_block);  /* leaves at 'while'/'until' */
-
-      Token *p_token = p_interpret->p_token;
-      TokenType tt = p_interpret->tt;
-      if (tt != TT_WHILE && tt != TT_UNTIL)
-         _INTERPRET_ERROR(
-            "Expected 'while' or 'until' after 'do' block", p_token);
-
-      _NEXT   /* past 'while' or 'until' */
-
-      /* Collect condition tokens until ';' — mirrors _expression_get but
-       * stops at semicolon instead of '{' since there is no block here */
-      while (p_interpret->tt != TT_SEMICOLON
-             && p_interpret->tt != TT_NONE) {
-         list_add_back(p_list_expr, p_interpret->p_token);
-         _NEXT
-      }
-      _NEXT   /* past ';' */
-      Token *p_token_backup = p_interpret->p_token;  /* after ';' */
-
-      _Bool b_flag = true;
-      do {
-         scope_up(p_interpret->p_scope);
-         interpret_subprocess(p_interpret, p_list_block);
-         scope_down(p_interpret->p_scope);
-
-         /* Handle break/next/ret before re-evaluating the condition.
-          * For ret: stop the loop without touching the return value on
-          * p_interpret->p_stack; skip condition eval via continue. */
-         if (p_interpret->ct == CONTROL_BREAK) {
-            p_interpret->ct = CONTROL_NONE;
-            b_flag = false;
-            continue;
-         } else if (p_interpret->ct == CONTROL_NEXT) {
-            p_interpret->ct = CONTROL_NONE;
-            /* fall through to condition check */
-         } else if (p_interpret->ct == CONTROL_RET) {
-            /* ret inside do-loop: propagate CONTROL_RET; skip condition
-             * re-eval to avoid corrupting the stack with cond results. */
-            b_flag = false;
-            continue;
-         }
-
-         /* Re-evaluate condition using a temp stack/iterator over
-          * p_list_expr, exactly as the while/until loop does */
-         Stack *p_stack_backup = p_interpret->p_stack;
-         p_interpret->p_stack = stack_new();
-         ListIterator *p_iter_backup = p_interpret->p_iter;
-         p_interpret->p_iter = listiterator_new(p_list_expr);
-         _NEXT
-
-         if (_expression_(p_interpret)) {
-            Token *p_token_top = stack_pop(p_interpret->p_stack);
-            int i_val = convert_to_integer_get(p_token_top);
-            b_flag = (tt == TT_WHILE) ? (i_val != 0) : (i_val == 0);
-         }
-
-         listiterator_delete(p_interpret->p_iter);
-         p_interpret->p_iter = p_iter_backup;
-         stack_delete(p_interpret->p_stack);
-         p_interpret->p_stack = p_stack_backup;
-
-      } while (b_flag);
-
-      list_delete(p_list_block);
-      list_delete(p_list_expr);
-      p_interpret->p_token = p_token_backup;
-      p_interpret->tt = token_get_tt(p_token_backup);
-      return (1);
-   }
-   break;
+      return (_control_do(p_interpret));
    NO_DEFAULT;
    }
 

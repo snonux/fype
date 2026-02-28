@@ -79,6 +79,9 @@ int _program(Interpret *p_interpret);
 int _statement(Interpret *p_interpret);
 int _sum(Interpret *p_interpret);
 int _term(Interpret *p_interpret);
+static int _term_ident(Interpret *p_interpret);
+static int _term_array_literal(Interpret *p_interpret);
+static int _term_paren(Interpret *p_interpret);
 int _term_array_access(Interpret *p_interpret,
                        Token *p_token_array, Array *p_array);
 int _var_assign(Interpret *p_interpret);
@@ -1053,6 +1056,169 @@ _term_array_access(Interpret *p_interpret,
    return (1);
 }
 
+/* Handle the TT_IDENT case in _term(): resolve the identifier as an array
+ * access, builtin call, self-defined function/procedure call, or variable.
+ * Returns 1 on success, 0 if no matching symbol kind is handled. */
+static int
+_term_ident(Interpret *p_interpret) {
+   if (_NEXT_TT != TT_ASSIGN) {
+      if (_NEXT_TT == TT_PARANT_AL) {
+         /* Delegate to the array-access / slice helper */
+         char *c_name = token_get_val(p_interpret->p_token);
+         Symbol *p_symbol = scope_get(p_interpret->p_scope, c_name);
+
+         if (p_symbol == NULL)
+            _INTERPRET_ERROR("No such symbol", p_interpret->p_token);
+
+         Token *p_token_array = symbol_get_val(p_symbol);
+         Array *p_array = TOKEN_GET_ARRAY(p_token_array);
+
+         if (p_array == NULL)
+            _INTERPRET_ERROR("Expected an array", p_interpret->p_token);
+
+         return (_term_array_access(p_interpret, p_token_array, p_array));
+
+      } else if (function_is_buildin(p_interpret->p_token)) {
+         Token *p_token = p_interpret->p_token;
+         Stack *p_stack = p_interpret->p_stack;
+         p_interpret->p_stack = stack_new();
+
+         if (_HAS_NEXT) {
+            _NEXT
+            //if (_expression_(p_interpret));
+            _expression_(p_interpret);
+
+         } else {
+            _SKIP
+         }
+
+         function_process_buildin(p_interpret, p_token,
+                                  p_interpret->p_stack);
+
+         stack_merge(p_stack, p_interpret->p_stack);
+         stack_delete(p_interpret->p_stack);
+         p_interpret->p_stack = p_stack;
+
+         return (1);
+
+      } else if (function_is_self_defined(p_interpret)) {
+         Token *p_token = p_interpret->p_token;
+         Stack *p_stack = p_interpret->p_stack;
+         p_interpret->p_stack = stack_new();
+
+         _NEXT   /* advance past function name */
+         if (p_interpret->tt == TT_PARANT_L) {
+            /* Parenthesised call: func(arg1, arg2) — collect args */
+            _NEXT   /* past '(' */
+            while (p_interpret->tt != TT_PARANT_R
+                   && p_interpret->tt != TT_NONE) {
+               _expression_(p_interpret);
+               if (p_interpret->tt == TT_COMMA)
+                  _NEXT   /* past ',' between arguments */
+            }
+            _NEXT   /* past ')' */
+         } else {
+            /* Old-style call without parens (procedures; zero-arg funcs) */
+            if (_expression_(p_interpret));
+         }
+
+         function_process_self_defined(p_interpret, p_token);
+
+         if (stack_empty(p_interpret->p_stack)) {
+            Token *p_token = token_new_dummy();
+            token_set_tt(p_token, TT_INTEGER);
+            token_set_ival(p_token, 0);
+            stack_push(p_interpret->p_stack, p_token);
+         }
+
+         stack_merge(p_stack, p_interpret->p_stack);
+         stack_delete(p_interpret->p_stack);
+         p_interpret->p_stack = p_stack;
+
+         return (1);
+      }
+   }
+
+   /* It is not a function, it is a variable or some sort of */
+
+   char *c_name = token_get_val(p_interpret->p_token);
+   Symbol *p_symbol = scope_get(p_interpret->p_scope, c_name);
+
+   if (p_symbol == NULL)
+      _INTERPRET_ERROR("No such symbol", p_interpret->p_token);
+
+   SymbolType st = symbol_get_sym(p_symbol);
+
+   switch (st) {
+   case SYM_VARIABLE:
+      stack_push(p_interpret->p_stack, symbol_get_val(p_symbol));
+      _NEXT
+      return (1);
+
+      /* Example: proc foo { foo = "Hello"; } foo; say foo; */
+   case SYM_PROCEDURE:
+      stack_push(p_interpret->p_stack, symbol_get_val(p_symbol));
+      _NEXT
+      return (1);
+
+      NO_DEFAULT;
+   }
+
+   return (0);
+}
+
+/* Handle the TT_PARANT_AL case in _term(): construct an array literal.
+ * Reads comma/semicolon-separated expressions until ']' and pushes the
+ * resulting array token onto the eval stack. */
+static int
+_term_array_literal(Interpret *p_interpret) {
+   Token *p_token_arr = token_new_array(ARRAY_SIZE);
+   Array *p_array = p_token_arr->p_array;
+
+   _NEXT
+   /* Collect array elements; commas and semicolons are skipped */
+   while (p_interpret->tt != TT_PARANT_AR) {
+      TokenType tt = p_interpret->tt;
+      if (tt != TT_COMMA && tt != TT_SEMICOLON) {
+         UNLESS (_expression_(p_interpret)) {
+            Token *p_token = p_interpret->p_token;
+            _INTERPRET_ERROR("Expected expression", p_token);
+         }
+
+         array_unshift(p_array, stack_pop(p_interpret->p_stack));
+      }
+
+      _NEXT
+   }
+
+   stack_push(p_interpret->p_stack, p_token_arr);
+   _NEXT
+   return (1);
+}
+
+/* Handle the TT_PARANT_L case in _term(): evaluate a parenthesised
+ * expression and verify the closing ')'. */
+static int
+_term_paren(Interpret *p_interpret) {
+   Token *p_token = p_interpret->p_token;
+   _NEXT
+
+   if (_expression_(p_interpret)) {
+      if (p_interpret->tt != TT_PARANT_R)
+         _INTERPRET_ERROR("Expected ')'", p_token);
+
+   } else {
+      _INTERPRET_ERROR("Expected expression", p_token);
+   }
+
+   _NEXT
+   return (1);
+}
+
+/* Evaluate a single atomic expression term and push its value onto the eval
+ * stack.  Dispatches to per-case helpers for the complex TT_IDENT,
+ * TT_PARANT_AL, and TT_PARANT_L cases.
+ * Returns 1 on match, 2 on token-stream exhaustion, 0 on no match. */
 int
 _term(Interpret *p_interpret) {
    _CHECK TRACK
@@ -1072,113 +1238,8 @@ _term(Interpret *p_interpret) {
          return (1);
 
    case TT_IDENT:
-   {
-      if (_NEXT_TT != TT_ASSIGN) {
-         if (_NEXT_TT == TT_PARANT_AL) {
-            /* Delegate to the array-access / slice helper */
-            char *c_name = token_get_val(p_interpret->p_token);
-            Symbol *p_symbol = scope_get(
-                                  p_interpret->p_scope, c_name);
+      return (_term_ident(p_interpret));
 
-            if (p_symbol == NULL)
-               _INTERPRET_ERROR("No such symbol",
-                                p_interpret->p_token);
-            Token *p_token_array = symbol_get_val(p_symbol);
-            Array *p_array = TOKEN_GET_ARRAY(p_token_array);
-            if (p_array == NULL)
-               _INTERPRET_ERROR("Expected an array",
-                                p_interpret->p_token);
-
-            return (_term_array_access(p_interpret,
-                                       p_token_array, p_array));
-
-         } else if (function_is_buildin(p_interpret->p_token)) {
-            Token *p_token = p_interpret->p_token;
-            Stack *p_stack = p_interpret->p_stack;
-            p_interpret->p_stack = stack_new();
-
-            if (_HAS_NEXT) {
-               _NEXT
-               //if (_expression_(p_interpret));
-               _expression_(p_interpret);
-
-            } else {
-               _SKIP
-            }
-
-            function_process_buildin(p_interpret, p_token,
-                                     p_interpret->p_stack);
-
-            stack_merge(p_stack, p_interpret->p_stack);
-            stack_delete(p_interpret->p_stack);
-            p_interpret->p_stack = p_stack;
-
-            return (1);
-
-         } else if (function_is_self_defined(p_interpret)) {
-            Token *p_token = p_interpret->p_token;
-            Stack *p_stack = p_interpret->p_stack;
-            p_interpret->p_stack = stack_new();
-
-            _NEXT   /* advance past function name */
-            if (p_interpret->tt == TT_PARANT_L) {
-               /* Parenthesised call: func(arg1, arg2) — collect args */
-               _NEXT   /* past '(' */
-               while (p_interpret->tt != TT_PARANT_R
-                      && p_interpret->tt != TT_NONE) {
-                  _expression_(p_interpret);
-                  if (p_interpret->tt == TT_COMMA)
-                     _NEXT   /* past ',' between arguments */
-               }
-               _NEXT   /* past ')' */
-            } else {
-               /* Old-style call without parens (procedures; zero-arg funcs) */
-               if (_expression_(p_interpret));
-            }
-
-            function_process_self_defined(p_interpret, p_token);
-
-            if (stack_empty(p_interpret->p_stack)) {
-               Token *p_token = token_new_dummy();
-               token_set_tt(p_token, TT_INTEGER);
-               token_set_ival(p_token, 0);
-               stack_push(p_interpret->p_stack, p_token);
-            }
-
-            stack_merge(p_stack, p_interpret->p_stack);
-            stack_delete(p_interpret->p_stack);
-            p_interpret->p_stack = p_stack;
-
-            return (1);
-         }
-      }
-
-      /* It is not a function, it is a variable or some sort of */
-
-      char *c_name = token_get_val(p_interpret->p_token);
-      Symbol *p_symbol = scope_get(p_interpret->p_scope, c_name);
-
-      if (p_symbol == NULL)
-         _INTERPRET_ERROR("No such symbol", p_interpret->p_token);
-
-      SymbolType st = symbol_get_sym(p_symbol);
-
-      switch (st) {
-      case SYM_VARIABLE:
-         stack_push(p_interpret->p_stack, symbol_get_val(p_symbol));
-         _NEXT
-         return (1);
-
-         /* Example: proc foo { foo = "Hello"; } foo; say foo; */
-      case SYM_PROCEDURE:
-         stack_push(p_interpret->p_stack, symbol_get_val(p_symbol));
-         _NEXT
-         return (1);
-
-         NO_DEFAULT;
-      }
-   }
-   break;
    case TT_DEFINED:
    {
       _NEXT
@@ -1210,7 +1271,7 @@ _term(Interpret *p_interpret) {
       Token *p_token = NULL;
       Symbol *p_symbol = NULL;
 
-      if ((p_symbol = scope_remove(p_interpret->p_scope, c_name)))  {
+      if ((p_symbol = scope_remove(p_interpret->p_scope, c_name))) {
          symbol_delete(p_symbol);
          p_token = token_new_integer(1);
 
@@ -1237,7 +1298,6 @@ _term(Interpret *p_interpret) {
       if (p_symbol == NULL)
          _INTERPRET_ERROR("No such symbol", p_interpret->p_token);
 
-
       Token *p_token_num_refs = token_new_integer(p_symbol->i_refs);
       stack_push(p_interpret->p_stack, p_token_num_refs);
 
@@ -1247,47 +1307,10 @@ _term(Interpret *p_interpret) {
    break;
 
    case TT_PARANT_AL:
-   {
-      Token *p_token_arr = token_new_array(ARRAY_SIZE);
-      Array *p_array = p_token_arr->p_array;
-
-      _NEXT
-      // Get the array elements
-      while (p_interpret->tt != TT_PARANT_AR) {
-         TokenType tt = tt = p_interpret->tt;
-         if (tt != TT_COMMA && tt != TT_SEMICOLON) {
-            UNLESS (_expression_(p_interpret)) {
-               Token *p_token = p_interpret->p_token;
-               _INTERPRET_ERROR("Expected expression", p_token);
-            }
-
-            array_unshift(p_array, stack_pop(p_interpret->p_stack));
-         }
-
-         _NEXT
-      }
-
-      stack_push(p_interpret->p_stack, p_token_arr);
-      _NEXT
-      return (1);
-   }
-   break;
+      return (_term_array_literal(p_interpret));
 
    case TT_PARANT_L:
-   {
-      Token *p_token = p_interpret->p_token;
-      _NEXT
-
-      if (_expression_(p_interpret)) {
-         if (p_interpret->tt != TT_PARANT_R)
-            _INTERPRET_ERROR("Expected ')'", p_token);
-
-      } else {
-         _INTERPRET_ERROR("Expected expression", p_token);
-      }
-   }
-   _NEXT
-   return (1);
+      return (_term_paren(p_interpret));
 
    default:
       break;

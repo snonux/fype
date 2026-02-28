@@ -16,7 +16,12 @@ assert 5 == say len foo;
 
 # Print the last index of the array
 assert 4 == say ind foo;
-Token (id=00000, line=00006, pos=0005, type=TT_FUNC, val=func, ival=0, dval=0.000000, refs=1)
+
+# Print the 3rd element of the array
+say foo[3];
+
+#say "bla";
+Token (id=00000, line=00006, pos=0005, type=TT_IDENT, val=func, ival=0, dval=0.000000, refs=1)
 Token (id=00001, line=00006, pos=0009, type=TT_IDENT, val=bar, ival=0, dval=0.000000, refs=1)
 Token (id=00002, line=00006, pos=0011, type=TT_PARANT_CL, val={, ival=0, dval=0.000000, refs=1)
 Token (id=00003, line=00006, pos=0015, type=TT_IDENT, val=say, ival=0, dval=0.000000, refs=1)
@@ -69,13 +74,11 @@ Token (id=00049, line=00018, pos=0016, type=TT_IDENT, val=say, ival=0, dval=0.00
 Token (id=00050, line=00018, pos=0020, type=TT_IDENT, val=ind, ival=0, dval=0.000000, refs=1)
 Token (id=00051, line=00018, pos=0024, type=TT_IDENT, val=foo, ival=0, dval=0.000000, refs=1)
 Token (id=00052, line=00018, pos=0025, type=TT_SEMICOLON, val=;, ival=0, dval=0.000000, refs=1)
-bar
-0
-1
-2
-3.000000
-A
-BA
-BB
-5
-4
+Token (id=00053, line=00021, pos=0004, type=TT_IDENT, val=say, ival=0, dval=0.000000, refs=1)
+Token (id=00054, line=00021, pos=0008, type=TT_IDENT, val=foo, ival=0, dval=0.000000, refs=1)
+Token (id=00055, line=00021, pos=0009, type=TT_PARANT_AL, val=[, ival=0, dval=0.000000, refs=1)
+Token (id=00056, line=00021, pos=0010, type=TT_INTEGER, val=3, ival=3, dval=0.000000, refs=1)
+Token (id=00057, line=00021, pos=0010, type=TT_SEMICOLON, val=;, ival=0, dval=0.000000, refs=1)
+Token (id=00058, line=00021, pos=0011, type=TT_PARANT_AR, val=], ival=0, dval=0.000000, refs=1)
+Token (id=00059, line=00021, pos=0012, type=TT_SEMICOLON, val=;, ival=0, dval=0.000000, refs=1)
+No such symbol: Interpret error in ./test.fy line 6 pos 5 near 'func' (Fype @ src/core/interpret.c line 1150)

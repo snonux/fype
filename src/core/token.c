@@ -61,7 +61,6 @@ get_tt(char *c_token) {
    CHECK("proc") TT_PROC;
    CHECK("fun") TT_FUNC;
    CHECK("my") TT_MY;
-   CHECK("arr") TT_ARR;
    CHECK("!") TT_NOT;
    CHECK("!=") TT_NEQ;
    CHECK("=~") TT_RE;
@@ -127,7 +126,6 @@ tt_get_name(TokenType tt_cur) {
       CASE(TT_PROC,"TT_PROC")
       CASE(TT_FUNC,"TT_FUNC")
       CASE(TT_MY,"TT_MY")
-      CASE(TT_ARR,"TT_ARR")
       CASE(TT_WHILE,"TT_WHILE")
       CASE(TT_UNTIL,"TT_UNTIL")
       CASE(TT_NEXT,"TT_NEXT")

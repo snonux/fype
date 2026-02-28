@@ -267,7 +267,19 @@ _var_assign(Interpret *p_interpret) {
                p_interpret->p_stack = p_stack;
 
                p_token = stack_top(p_interpret->p_stack);
-               Symbol *p_symbol = symbol_new(SYM_VARIABLE, p_token);
+               /* For scalar types, own a fresh token so that in-place
+                * mutations (incr/decr) don't corrupt the function body's
+                * literal tokens across repeated calls. Arrays and strings
+                * keep reference semantics as-is. */
+               Token *p_own = p_token;
+               if (token_get_tt(p_token) == TT_INTEGER) {
+                  p_own = token_new_integer(token_get_ival(p_token));
+               } else if (token_get_tt(p_token) == TT_DOUBLE) {
+                  p_own = token_new_dummy();
+                  token_set_tt(p_own, TT_DOUBLE);
+                  token_set_dval(p_own, token_get_dval(p_token));
+               }
+               Symbol *p_symbol = symbol_new(SYM_VARIABLE, p_own);
                scope_newset(p_interpret->p_scope, c_name, p_symbol);
             } else {
                return (0);

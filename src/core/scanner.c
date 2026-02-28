@@ -287,7 +287,7 @@ scanner_run(List *p_list_token, Tupel *p_tupel_argv,
                _add_semicolon_to_list(p_scanner);
 
             char d = c_token[i_token_len-1];
-            if ((!isalpha(d) && !isdigit(d) /*&& d != '-'*/) &&
+            if ((!isalpha(d) && !isdigit(d) && d != '_' /*&& d != '-'*/) &&
                   (isalpha(c) || isdigit(c))) {
 
                scanner_add_token(p_scanner, &c_token, &i_token_len,

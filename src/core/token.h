@@ -101,7 +101,6 @@ typedef enum {
    TT_PROC,
    TT_FUNC,
    TT_MY,
-   TT_ARR,
    TT_WHILE,
    TT_UNTIL,
    TT_NEXT,

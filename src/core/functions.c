@@ -1,14 +1,14 @@
 /*:*
  *: File: ./src/core/functions.c
  *: A simple interpreter
- *: 
+ *:
  *: WWW		: https://codeberg.org/snonux/fype
  *: AUTHOR	: http://buetow.org
  *: E-Mail	: fype at dev.buetow.org
- *: 
- *: Copyright (c) 2005 - 2008, Paul Buetow 
+ *:
+ *: Copyright (c) 2005 - 2008, Paul Buetow
  *: All rights reserved.
- *: 
+ *:
  *: Redistribution and use in source and binary forms, with or without modi-
  *: fication, are permitted provided that the following conditions are met:
  *:  * Redistributions of source code must retain the above copyright
@@ -16,20 +16,20 @@
  *:  * Redistributions in binary form must reproduce the above copyright
  *:    notice, this list of conditions and the following disclaimer in the
  *:    documentation and/or other materials provided with the distribution.
- *:  * Neither the name of P. B. Labs nor the names of its contributors may 
- *:    be used to endorse or promote products derived from this software 
+ *:  * Neither the name of P. B. Labs nor the names of its contributors may
+ *:    be used to endorse or promote products derived from this software
  *:    without specific prior written permission.
- *: 
- *: THIS SOFTWARE IS PROVIDED BY PAUL C. BUETOW AS IS'' AND ANY EXPRESS OR 
- *: IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ *:
+ *: THIS SOFTWARE IS PROVIDED BY PAUL C. BUETOW AS IS'' AND ANY EXPRESS OR
+ *: IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *: WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *: DISCLAIMED. IN NO EVENT SHALL PAUL C. BUETOW BE LIABLE FOR ANY DIRECT, 
- *: INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
- *: (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- *:  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ *: DISCLAIMED. IN NO EVENT SHALL PAUL C. BUETOW BE LIABLE FOR ANY DIRECT,
+ *: INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *: (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ *:  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
  *: HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- *: STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- *: IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *: STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ *: IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *: POSSIBILITY OF SUCH DAMAGE.
  *:*/
 
@@ -52,13 +52,398 @@
 		token_get_val(t) \
 		)
 
+/* Built-in handler signature: interpret context, arg stack, calling token */
+typedef void (*BuiltinFn)(Interpret *p_interpret,
+                          Stack *p_stack_args,
+                          Token *p_token_ident);
+
+/* Dispatch table entry: built-in name + its handler */
+typedef struct {
+   const char *c_name;
+   BuiltinFn   fn;
+} BuiltinEntry;
+
+/* ─── Individual built-in handler functions ──────────────────────────── */
+
+static void
+_builtin_assert(Interpret *p_interpret, Stack *p_stack_args,
+                Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = stack_top(p_stack_args);
+   switch (token_get_tt(p_token)) {
+   case TT_INTEGER:
+      if (token_get_ival(p_token) == 0)
+         _FUNCTIONS_ERROR("Assert failed", p_token);
+      break;
+   case TT_DOUBLE:
+      if (token_get_dval(p_token) == 0)
+         _FUNCTIONS_ERROR("Assert failed", p_token);
+      break;
+   case TT_STRING:
+      if (atoi(token_get_val(p_token)) == 0)
+         _FUNCTIONS_ERROR("Assert failed", p_token);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+static void
+_builtin_decr(Interpret *p_interpret, Stack *p_stack_args,
+              Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   /* Modify the top-of-stack token in place */
+   Token *p_token = stack_top(p_stack_args);
+   switch (token_get_tt(p_token)) {
+   case TT_INTEGER:
+      token_set_ival(p_token, token_get_ival(p_token) - 1);
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_token, token_get_dval(p_token) - 1);
+      break;
+   case TT_STRING:
+      convert_to_integer(p_token);
+      token_set_ival(p_token, token_get_ival(p_token) - 1);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+static void
+_builtin_double(Interpret *p_interpret, Stack *p_stack_args,
+                Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   convert_to_double(p_token);
+   stack_push(p_stack_args, p_token);
+}
+
+static void
+_builtin_end(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   (void) p_interpret;
+   (void) p_stack_args;
+   (void) p_token_ident;
+   exit(0);
+}
+
+static void
+_builtin_exit(Interpret *p_interpret, Stack *p_stack_args,
+              Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_top(p_stack_args));
+   convert_to_integer(p_token);
+   exit(token_get_ival(p_token));
+}
+
+static void
+_builtin_fork(Interpret *p_interpret, Stack *p_stack_args,
+              Token *p_token_ident) {
+   (void) p_interpret;
+   (void) p_token_ident;
+   stack_push(p_stack_args, token_new_integer((int) fork()));
+}
+
+static void
+_builtin_gc(Interpret *p_interpret, Stack *p_stack_args,
+            Token *p_token_ident) {
+   (void) p_interpret;
+   (void) p_token_ident;
+   stack_push(p_stack_args, token_new_integer(garbage_collect()));
+}
+
+static void
+_builtin_incr(Interpret *p_interpret, Stack *p_stack_args,
+              Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   /* Modify the top-of-stack token in place */
+   Token *p_token = stack_top(p_stack_args);
+   switch (token_get_tt(p_token)) {
+   case TT_INTEGER:
+      token_set_ival(p_token, token_get_ival(p_token) + 1);
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_token, token_get_dval(p_token) + 1);
+      break;
+   case TT_STRING:
+      convert_to_integer(p_token);
+      token_set_ival(p_token, token_get_ival(p_token) + 1);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+static void
+_builtin_ind(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   /* Array case (ind on TT_ARRAY) is handled by the array dispatcher;
+    * reaching here means the argument was not an array. */
+   (void) p_interpret;
+   (void) p_stack_args;
+   _FUNCTIONS_ERROR("Expected array", p_token_ident);
+}
+
+static void
+_builtin_integer(Interpret *p_interpret, Stack *p_stack_args,
+                 Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   convert_to_integer(p_token);
+   stack_push(p_stack_args, p_token);
+}
+
+static void
+_builtin_len(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   /* Convert to string to measure length, then return as integer */
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   convert_to_string(p_token);
+   token_set_tt(p_token, TT_INTEGER);
+   token_set_ival(p_token, strlen(token_get_val(p_token)));
+   stack_push(p_stack_args, p_token);
+}
+
+static void
+_builtin_ln(Interpret *p_interpret, Stack *p_stack_args,
+            Token *p_token_ident) {
+   (void) p_interpret;
+   (void) p_stack_args;
+   (void) p_token_ident;
+   printf("\n");
+}
+
+static void
+_builtin_neg(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   stack_push(p_stack_args, p_token);
+   switch (token_get_tt(p_token)) {
+   case TT_INTEGER:
+      token_set_ival(p_token, -token_get_ival(p_token));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_token, -token_get_dval(p_token));
+      break;
+   case TT_STRING:
+      token_set_ival(p_token, -atoi(token_get_val(p_token)));
+      token_set_tt(p_token, TT_INTEGER);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+static void
+_builtin_no(Interpret *p_interpret, Stack *p_stack_args,
+            Token *p_token_ident) {
+   /* 'no' with no args pushes integer 0; otherwise logical NOT of arg */
+   (void) p_interpret;
+   (void) p_token_ident;
+   Token *p_token = NULL;
+   if (0 == stack_size(p_stack_args)) {
+      p_token = token_new_integer(0);
+   } else {
+      p_token = token_new_copy(stack_pop(p_stack_args));
+      switch (token_get_tt(p_token)) {
+      case TT_INTEGER:
+         token_set_ival(p_token, !token_get_ival(p_token));
+         break;
+      case TT_DOUBLE:
+         token_set_dval(p_token, !token_get_dval(p_token));
+         break;
+      case TT_STRING:
+         token_set_ival(p_token, !atoi(token_get_val(p_token)));
+         token_set_tt(p_token, TT_INTEGER);
+         break;
+         NO_DEFAULT;
+      }
+   }
+   stack_push(p_stack_args, p_token);
+}
+
+static void
+_builtin_not(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   /* 'not' requires an argument and performs logical NOT */
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   stack_push(p_stack_args, p_token);
+   switch (token_get_tt(p_token)) {
+   case TT_INTEGER:
+      token_set_ival(p_token, !token_get_ival(p_token));
+      break;
+   case TT_DOUBLE:
+      token_set_dval(p_token, !token_get_dval(p_token));
+      break;
+   case TT_STRING:
+      token_set_ival(p_token, !atoi(token_get_val(p_token)));
+      token_set_tt(p_token, TT_INTEGER);
+      break;
+      NO_DEFAULT;
+   }
+}
+
+static void
+_builtin_put(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   /* Print all stack items without a trailing newline */
+   (void) p_interpret;
+   (void) p_token_ident;
+   StackIterator *p_iter = stackiterator_new(p_stack_args);
+   while (stackiterator_has_next(p_iter)) {
+      Token *p_token = stackiterator_next(p_iter);
+      switch (token_get_tt(p_token)) {
+      case TT_INTEGER:
+         printf("%d", token_get_ival(p_token));
+         break;
+      case TT_DOUBLE:
+         printf("%f", token_get_dval(p_token));
+         break;
+      case TT_STRING:
+         printf("%s", token_get_val(p_token));
+         break;
+         NO_DEFAULT;
+      }
+   }
+   stackiterator_delete(p_iter);
+}
+
+static void
+_builtin_refs(Interpret *p_interpret, Stack *p_stack_args,
+              Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token_top = stack_pop(p_stack_args);
+   stack_push(p_stack_args,
+              token_new_integer(p_token_top->i_ref_count));
+}
+
+static void
+_builtin_say(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   /* Print all stack items followed by a newline */
+   (void) p_interpret;
+   (void) p_token_ident;
+   StackIterator *p_iter = stackiterator_new(p_stack_args);
+   while (stackiterator_has_next(p_iter)) {
+      Token *p_token = stackiterator_next(p_iter);
+      switch (token_get_tt(p_token)) {
+      case TT_INTEGER:
+         printf("%d", token_get_ival(p_token));
+         break;
+      case TT_DOUBLE:
+         printf("%f", token_get_dval(p_token));
+         break;
+      case TT_STRING:
+         printf("%s", token_get_val(p_token));
+         break;
+         NO_DEFAULT;
+      }
+   }
+   stackiterator_delete(p_iter);
+   printf("\n");
+}
+
+static void
+_builtin_scope(Interpret *p_interpret, Stack *p_stack_args,
+               Token *p_token_ident) {
+   (void) p_stack_args;
+   (void) p_token_ident;
+   scope_print(p_interpret->p_scope);
+}
+
+static void
+_builtin_string(Interpret *p_interpret, Stack *p_stack_args,
+                Token *p_token_ident) {
+   (void) p_interpret;
+   if (0 == stack_size(p_stack_args))
+      _FUNCTIONS_ERROR("No argument given", p_token_ident);
+
+   Token *p_token = token_new_copy(stack_pop(p_stack_args));
+   convert_to_string(p_token);
+   stack_push(p_stack_args, p_token);
+}
+
+static void
+_builtin_yes(Interpret *p_interpret, Stack *p_stack_args,
+             Token *p_token_ident) {
+   /* 'yes' with no args pushes integer 1; otherwise forces arg to 1 */
+   (void) p_interpret;
+   (void) p_token_ident;
+   Token *p_token = NULL;
+   if (0 == stack_size(p_stack_args)) {
+      p_token = token_new_integer(1);
+   } else {
+      p_token = token_new_copy(stack_pop(p_stack_args));
+      token_set_ival(p_token, 1);
+      token_set_tt(p_token, TT_INTEGER);
+   }
+   stack_push(p_stack_args, p_token);
+}
+
+/* ─── Dispatch table: maps built-in name to handler (NULL-terminated) ─── */
+
+static const BuiltinEntry g_builtins[] = {
+   { "assert",  _builtin_assert  },
+   { "decr",    _builtin_decr    },
+   { "double",  _builtin_double  },
+   { "end",     _builtin_end     },
+   { "exit",    _builtin_exit    },
+   { "fork",    _builtin_fork    },
+   { "gc",      _builtin_gc      },
+   { "incr",    _builtin_incr    },
+   { "ind",     _builtin_ind     },
+   { "integer", _builtin_integer },
+   { "len",     _builtin_len     },
+   { "ln",      _builtin_ln      },
+   { "neg",     _builtin_neg     },
+   { "no",      _builtin_no      },
+   { "not",     _builtin_not     },
+   { "put",     _builtin_put     },
+   { "refs",    _builtin_refs    },
+   { "say",     _builtin_say     },
+   { "scope",   _builtin_scope   },
+   { "string",  _builtin_string  },
+   { "yes",     _builtin_yes     },
+   { NULL, NULL }
+};
+
+/* ─── Functions struct lifecycle ─────────────────────────────────────── */
+
 Functions*
 functions_new() {
    Functions *p_functions = malloc(sizeof(Functions));
-
    p_functions->p_hash_functions = hash_new(1024);
    functions_init(p_functions);
-
    return (p_functions);
 }
 
@@ -68,6 +453,7 @@ functions_delete(Functions *p_functions) {
    free(p_functions);
 }
 
+/* ─── Operator processing ────────────────────────────────────────────── */
 
 void
 _process(Interpret *p_interpret, Token *p_token_store, Token *p_token_op,
@@ -597,72 +983,16 @@ function_process(Interpret *p_interpret, Token *p_token_op,
    stack_push(p_stack_args, p_token_store);
 }
 
+/* ─── Built-in function public API ──────────────────────────────────── */
+
 _Bool
 function_is_buildin(Token *p_token_ident) {
-   /* TODO: optimize this function */
-   if (strcmp("assert", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("decr", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("double", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("end", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("exit", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("fork", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("gc", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("incr", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("ind", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("integer", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("len", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("ln", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("neg", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("no", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("put", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("scope", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("say", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("string", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("yes", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("not", token_get_val(p_token_ident)) == 0)
-      return (true);
-
-   if (strcmp("refs", token_get_val(p_token_ident)) == 0)
-      return (true);
-
+   /* Look up the token's name in the dispatch table */
+   const char *c_name = token_get_val(p_token_ident);
+   for (int i = 0; g_builtins[i].c_name != NULL; ++i) {
+      if (strcmp(g_builtins[i].c_name, c_name) == 0)
+         return (true);
+   }
    return (false);
 }
 
@@ -670,282 +1000,42 @@ void
 function_process_buildin(Interpret *p_interpret, Token *p_token_ident,
                          Stack *p_stack_args) {
 
+   /* Special array dispatch: apply len/ind to the whole array, or
+    * iterate element-wise for all other built-ins. */
    Token *p_token = stack_top(p_stack_args);
-
    if (token_get_tt(p_token) == TT_ARRAY) {
-      if (strcmp("len", token_get_val(p_token_ident)) == 0) {
+      const char *c_name = token_get_val(p_token_ident);
+      if (strcmp("len", c_name) == 0) {
          stack_pop(p_stack_args);
          stack_push(p_stack_args,
                     token_new_integer(array_get_used(p_token->p_array)));
 
-      } else if (strcmp("ind", token_get_val(p_token_ident)) == 0) {
+      } else if (strcmp("ind", c_name) == 0) {
          stack_pop(p_stack_args);
          stack_push(p_stack_args,
                     token_new_integer(array_get_ind(p_token->p_array)));
 
       } else {
+         /* Apply built-in element-wise over every array element */
          ArrayIterator *p_iter = arrayiterator_new(p_token->p_array);
-
          while (arrayiterator_has_next(p_iter)) {
             stack_push(p_stack_args, arrayiterator_next(p_iter));
             function_process_buildin(p_interpret, p_token_ident,
                                      p_stack_args);
             stack_pop(p_stack_args);
          }
-
          arrayiterator_delete(p_iter);
       }
-
       return;
    }
 
-   if (strcmp("assert", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      switch (token_get_tt(p_token)) {
-      case TT_INTEGER:
-         if (token_get_ival(p_token) == 0)
-            _FUNCTIONS_ERROR("Assert failed", p_token);
-         break;
-      case TT_DOUBLE:
-         if (token_get_dval(p_token) == 0)
-            _FUNCTIONS_ERROR("Assert failed", p_token);
-         break;
-      case TT_STRING:
-         if (atoi(token_get_val(p_token)) == 0)
-            _FUNCTIONS_ERROR("Assert failed", p_token);
-         break;
-         NO_DEFAULT;
+   /* Dispatch to the named built-in handler via the table */
+   const char *c_name = token_get_val(p_token_ident);
+   for (int i = 0; g_builtins[i].c_name != NULL; ++i) {
+      if (strcmp(g_builtins[i].c_name, c_name) == 0) {
+         g_builtins[i].fn(p_interpret, p_stack_args, p_token_ident);
+         return;
       }
-
-   } else if (strcmp("decr", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      switch (token_get_tt(p_token)) {
-      case TT_INTEGER:
-         token_set_ival(p_token, token_get_ival(p_token) - 1);
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token, token_get_dval(p_token) - 1);
-         break;
-      case TT_STRING:
-         convert_to_integer(p_token);
-         token_set_ival(p_token, token_get_ival(p_token) - 1);
-         break;
-         NO_DEFAULT;
-      }
-
-   } else if (strcmp("double", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      convert_to_double(p_token);
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("end", token_get_val(p_token_ident)) == 0) {
-      exit(0);
-
-   } else if (strcmp("fork", token_get_val(p_token_ident)) == 0) {
-      Token *p_token = token_new_integer((int) fork());
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("gc", token_get_val(p_token_ident)) == 0) {
-      int i_count = garbage_collect();
-      Token *p_token = token_new_integer(i_count);
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("exit", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      p_token = token_new_copy(p_token);
-      convert_to_integer(p_token);
-      exit(token_get_ival(p_token));
-
-   } else if (strcmp("incr", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      switch (token_get_tt(p_token)) {
-      case TT_INTEGER:
-         token_set_ival(p_token, token_get_ival(p_token) + 1);
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token, token_get_dval(p_token) + 1);
-         break;
-      case TT_STRING:
-         convert_to_integer(p_token);
-         token_set_ival(p_token, token_get_ival(p_token) + 1);
-         break;
-         NO_DEFAULT;
-      }
-
-   } else if (strcmp("ind", token_get_val(p_token_ident)) == 0) {
-      _FUNCTIONS_ERROR("Expected array", p_token_ident);
-
-   } else if (strcmp("integer", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      convert_to_integer(p_token);
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("len", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      convert_to_string(p_token);
-      token_set_tt(p_token, TT_INTEGER);
-      token_set_ival(p_token, strlen(token_get_val(p_token)));
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("ln", token_get_val(p_token_ident)) == 0) {
-      printf("\n");
-
-   } else if (strcmp("neg", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      stack_push(p_stack_args, p_token);
-
-      switch (token_get_tt(p_token)) {
-      case TT_INTEGER:
-         token_set_ival(p_token, -token_get_ival(p_token));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token, -token_get_dval(p_token));
-         break;
-      case TT_STRING:
-         token_set_ival(p_token, -atoi(token_get_val(p_token)));
-         token_set_tt(p_token, TT_INTEGER);
-         break;
-         NO_DEFAULT;
-      }
-
-   } else if (strcmp("no", token_get_val(p_token_ident)) == 0) {
-      Token *p_token = NULL;
-
-      if (0 == stack_size(p_stack_args)) {
-         p_token = token_new_integer(0);
-
-      } else {
-         p_token = token_new_copy(stack_pop(p_stack_args));
-
-         switch (token_get_tt(p_token)) {
-         case TT_INTEGER:
-            token_set_ival(p_token, !token_get_ival(p_token));
-            break;
-         case TT_DOUBLE:
-            token_set_dval(p_token, !token_get_dval(p_token));
-            break;
-         case TT_STRING:
-            token_set_ival(p_token, !atoi(token_get_val(p_token)));
-            token_set_tt(p_token, TT_INTEGER);
-            break;
-            NO_DEFAULT;
-         }
-      }
-
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("put", token_get_val(p_token_ident)) == 0) {
-      StackIterator *p_iter = stackiterator_new(p_stack_args);
-      while (stackiterator_has_next(p_iter)) {
-         Token *p_token = stackiterator_next(p_iter);
-         switch (token_get_tt(p_token)) {
-         case TT_INTEGER:
-            printf("%d", token_get_ival(p_token));
-            break;
-         case TT_DOUBLE:
-            printf("%f", token_get_dval(p_token));
-            break;
-         case TT_STRING:
-            printf("%s", token_get_val(p_token));
-            break;
-            NO_DEFAULT;
-         }
-      }
-      stackiterator_delete(p_iter);
-
-   } else if (strcmp("scope", token_get_val(p_token_ident)) == 0) {
-      scope_print(p_interpret->p_scope);
-
-   } else if (strcmp("say", token_get_val(p_token_ident)) == 0) {
-      StackIterator *p_iter = stackiterator_new(p_stack_args);
-      while (stackiterator_has_next(p_iter)) {
-         Token *p_token = stackiterator_next(p_iter);
-         switch (token_get_tt(p_token)) {
-         case TT_INTEGER:
-            printf("%d", token_get_ival(p_token));
-            break;
-         case TT_DOUBLE:
-            printf("%f", token_get_dval(p_token));
-            break;
-         case TT_STRING:
-            printf("%s", token_get_val(p_token));
-            break;
-         }
-      }
-      stackiterator_delete(p_iter);
-      printf("\n");
-
-   } else if (strcmp("string", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      convert_to_string(p_token);
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("yes", token_get_val(p_token_ident)) == 0) {
-      Token *p_token = NULL;
-
-      if (0 == stack_size(p_stack_args)) {
-         p_token = token_new_integer(1);
-
-      } else {
-         p_token = token_new_copy(stack_pop(p_stack_args));
-         token_set_ival(p_token, 1);
-         token_set_tt(p_token, TT_INTEGER);
-
-      }
-
-      stack_push(p_stack_args, p_token);
-
-   } else if (strcmp("not", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token = token_new_copy(stack_pop(p_stack_args));
-      stack_push(p_stack_args, p_token);
-
-      switch (token_get_tt(p_token)) {
-      case TT_INTEGER:
-         token_set_ival(p_token, !token_get_ival(p_token));
-         break;
-      case TT_DOUBLE:
-         token_set_dval(p_token, !token_get_dval(p_token));
-         break;
-      case TT_STRING:
-         token_set_ival(p_token, !atoi(token_get_val(p_token)));
-         token_set_tt(p_token, TT_INTEGER);
-         break;
-         NO_DEFAULT;
-      }
-
-   } else if (strcmp("refs", token_get_val(p_token_ident)) == 0) {
-      if (0 == stack_size(p_stack_args))
-         _FUNCTIONS_ERROR("No argument given", p_token_ident);
-
-      Token *p_token_top = stack_pop(p_stack_args);
-      Token *p_token = token_new_integer(p_token_top->i_ref_count);
-      stack_push(p_stack_args, p_token);
    }
 }
 
@@ -1008,8 +1098,9 @@ function_process_self_defined(Interpret *p_interpret, Token *p_token_ident) {
 
       interpret_subprocess(p_interpret, p_funcdef->p_body);
 
-      /* Consume CONTROL_RET here; return value(s) are already on the stack
-       * (merged by interpret_subprocess when CONTROL_RET was active). */
+      /* Consume CONTROL_RET here; return value(s) are already on the
+       * stack (merged by interpret_subprocess when CONTROL_RET was
+       * active). */
       if (p_interpret->ct == CONTROL_RET)
          p_interpret->ct = CONTROL_NONE;
 
@@ -1021,4 +1112,5 @@ function_process_self_defined(Interpret *p_interpret, Token *p_token_ident) {
 
 void
 functions_init(Functions *p_functions) {
+   (void) p_functions;
 }

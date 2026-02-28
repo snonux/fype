@@ -467,18 +467,20 @@ _func_decl(Interpret *p_interpret) {
    return (0);
 }
 
+/* Try each parse rule in priority order; the first that matches
+ * returns 1.  Every rule either consumes tokens and returns 1,
+ * or leaves the token stream untouched and returns 0, so a single
+ * pass suffices — the former double-retry loop was vestigial. */
 int
 _statement(Interpret *p_interpret) {
    _CHECK TRACK
 
-   for (int i = 0; i < 2; ++i) {
-      if (_proc_decl(p_interpret)) return (1);
-      if (_func_decl(p_interpret)) return (1);
-      if (_var_decl(p_interpret)) return (1);
-      if (_control(p_interpret)) return (1);
-      if (_expression(p_interpret)) return (1);
-      if (_block(p_interpret)) return (1);
-   }
+   if (_proc_decl(p_interpret))  return (1);
+   if (_func_decl(p_interpret))  return (1);
+   if (_var_decl(p_interpret))   return (1);
+   if (_control(p_interpret))    return (1);
+   if (_expression(p_interpret)) return (1);
+   if (_block(p_interpret))      return (1);
 
    return (0);
 }
